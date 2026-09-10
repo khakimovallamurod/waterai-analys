@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+
+{% block title %}Suv parametrlarini kiritish va AI tahlil — WaterAI Analysis{% endblock %}
+
+{% block content %}
+<div class="wide-container py-8 space-y-8">
+  
+  <!-- Sarlavha -->
+  <div class="text-center max-w-2xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-bold uppercase tracking-wider mb-2">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      AI Tahlil Laboratoriyasi
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+      Suv parametrlarini kiriting
+    </h1>
+    <p class="mt-2 text-sm text-slate-500">
+      Suv namunasining asosiy ko‘rsatkichlarini slayderlar orqali sozlang yoki tayyor namunalardan birini tanlang
+    </p>
+  </div>
+
+  <!-- Namunalar (Presets) Bloki -->
+  <div class="glass-panel rounded-3xl p-5 border border-sky-100 shadow-sm">
+    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+      <i class="fa-solid fa-bolt text-amber-500"></i>
+      <span>Tayyor namunalar orqali sinab ko‘ring:</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <button
+        type="button"
+        id="preset_vodoprovod"
+        onclick="applyPreset('vodoprovod')"
+        class="preset-btn p-3 rounded-2xl border border-slate-200 hover:border-sky-300 bg-white hover:bg-sky-50 text-left transition-all group"
+      >
+        <div class="text-lg">🚰</div>
+        <div class="text-xs font-bold text-slate-800 group-hover:text-sky-600 mt-1">Vodoprovod</div>
+        <div class="text-[10px] text-emerald-600 font-semibold">🟢 Yaroqli namuna</div>
+      </button>
+
+      <button
+        type="button"
+        id="preset_buloq"
+        onclick="applyPreset('buloq')"
+        class="preset-btn p-3 rounded-2xl border border-slate-200 hover:border-sky-300 bg-white hover:bg-sky-50 text-left transition-all group"
+      >
+        <div class="text-lg">⛰️</div>
+        <div class="text-xs font-bold text-slate-800 group-hover:text-sky-600 mt-1">Tog‘ bulog‘i</div>
+        <div class="text-[10px] text-emerald-600 font-semibold">🟢 Kristal toza</div>
+      </button>
+
+      <button
+        type="button"
+        id="preset_quduq"
+        onclick="applyPreset('quduq')"
+        class="preset-btn p-3 rounded-2xl border border-slate-200 hover:border-amber-300 bg-white hover:bg-amber-50 text-left transition-all group"
+      >
+        <div class="text-lg">🧱</div>
+        <div class="text-xs font-bold text-slate-800 group-hover:text-amber-600 mt-1">Quduq suvi</div>
+        <div class="text-[10px] text-amber-600 font-semibold">🟡 Qattiqlik yuqori</div>
+      </button>
+
+      <button
+        type="button"
+        id="preset_daryo"
+        onclick="applyPreset('daryo')"
+        class="preset-btn p-3 rounded-2xl border border-slate-200 hover:border-rose-300 bg-white hover:bg-rose-50 text-left transition-all group"
+      >
+        <div class="text-lg">🌊</div>
+        <div class="text-xs font-bold text-slate-800 group-hover:text-rose-600 mt-1">Daryo suvi</div>
+        <div class="text-[10px] text-rose-600 font-semibold">🔴 Loyqalik va sulfat</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Asosiy Forma -->
+  <form action="/analyze" method="POST" id="waterAnalysisForm" class="space-y-6">
+    
+    <!-- Namuna Meta Ma'lumotlari -->
+    <div class="glass-panel rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+      <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info text-sky-500"></i>
+        Namuna ma’lumotlari
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="sample_name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+            Namuna nomi
+          </label>
+          <input
+            type="text"
+            id="sample_name"
+            name="sample_name"
+            required
+            value="Toshkent vodoprovod suvi"
+            placeholder="Masalan: Uy filtri oldidan olingan suv"
+            class="block w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          >
+        </div>
+
+        <div>
+          <label for="source_type" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+            Suv manbai turi
+          </label>
+          <select
+            id="source_type"
+            name="source_type"
+            class="block w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          >
+            <option value="Vodoprovod suvi">Vodoprovod suvi</option>
+            <option value="Daryo suvi">Daryo suvi</option>
+            <option value="Quduq suvi">Quduq suvi</option>
+            <option value="Artezian suvi">Artezian suvi</option>
+            <option value="Ko‘l suvi">Ko‘l suvi</option>
+            <option value="Boshqa">Boshqa</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="location" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+            Hudud / Manzil (ixtiyoriy)
+          </label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            value="Toshkent shahri"
+            placeholder="Toshkent, Yunusobod tumani"
+            class="block w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Parametrlar Grid Kartalari (Wide Responsive: 1 kol sm, 2 kol md, 3 kol lg, 5 kol 2xl) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4">
+
+      <!-- 1. pH -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🧪</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">pH ko‘rsatkichi</div>
+              <div class="text-[11px] text-slate-400">Me’yor: 6.5 &ndash; 8.5</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="ph_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-14 text-right" id="ph_val">7.00</div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="ph_slider"
+            min="0"
+            max="14"
+            step="0.01"
+            value="7.00"
+            oninput="updateParam('ph', this.value, 2)"
+          >
+          <input type="hidden" id="ph_input" name="ph" value="7.00">
+        </div>
+      </div>
+
+      <!-- 2. TDS -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">💠</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">TDS (Umumiy erigan tuzlar)</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 1000 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="tds_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="tds_val">250</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="tds_slider"
+            min="0"
+            max="2000"
+            step="1"
+            value="250"
+            oninput="updateParam('tds', this.value, 0)"
+          >
+          <input type="hidden" id="tds_input" name="tds" value="250">
+        </div>
+      </div>
+
+      <!-- 3. Turbidlik (Loyqalik) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">〰️</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Turbidlik (Loyqalik)</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 5.0 NTU</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="turbidity_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="turbidity_val">1.0</span> <span class="text-xs font-normal">NTU</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="turbidity_slider"
+            min="0"
+            max="20"
+            step="0.1"
+            value="1.0"
+            oninput="updateParam('turbidity', this.value, 1)"
+          >
+          <input type="hidden" id="turbidity_input" name="turbidity" value="1.0">
+        </div>
+      </div>
+
+      <!-- 4. Qattiqlik (Hardness) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🛡️</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Qattiqlik (Hardness)</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 200 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="hardness_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="hardness_val">150</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="hardness_slider"
+            min="0"
+            max="1000"
+            step="1"
+            value="150"
+            oninput="updateParam('hardness', this.value, 0)"
+          >
+          <input type="hidden" id="hardness_input" name="hardness" value="150">
+        </div>
+      </div>
+
+      <!-- 5. Sulfatlar -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">💧</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Sulfatlar</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 250 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="sulfate_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="sulfate_val">100</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="sulfate_slider"
+            min="0"
+            max="1500"
+            step="1"
+            value="100"
+            oninput="updateParam('sulfate', this.value, 0)"
+          >
+          <input type="hidden" id="sulfate_input" name="sulfate" value="100">
+        </div>
+      </div>
+
+      <!-- 6. Xloraminlar -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🫧</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Xloraminlar</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 4.0 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="chloramines_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="chloramines_val">2.00</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="chloramines_slider"
+            min="0"
+            max="10"
+            step="0.01"
+            value="2.00"
+            oninput="updateParam('chloramines', this.value, 2)"
+          >
+          <input type="hidden" id="chloramines_input" name="chloramines" value="2.00">
+        </div>
+      </div>
+
+      <!-- 7. Organik Uglerod -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🌿</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Organik uglerod</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 10.0 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="organic_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="organic_val">2.0</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="organic_slider"
+            min="0"
+            max="30"
+            step="0.1"
+            value="2.0"
+            oninput="updateParam('organic', this.value, 1)"
+          >
+          <input type="hidden" id="organic_input" name="organic" value="2.0">
+        </div>
+      </div>
+
+      <!-- 8. Trihalometanlar -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🔬</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Trihalometanlar</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 80.0 mg/L</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="trihalomethanes_badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">Normal</span>
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="trihalomethanes_val">10.0</span> <span class="text-xs font-normal">mg/L</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="trihalomethanes_slider"
+            min="0"
+            max="150"
+            step="0.1"
+            value="10.0"
+            oninput="updateParam('trihalomethanes', this.value, 1)"
+          >
+          <input type="hidden" id="trihalomethanes_input" name="trihalomethanes" value="10.0">
+        </div>
+      </div>
+
+      <!-- 9. Harorat (°C) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🌡️</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Harorat (°C)</div>
+              <div class="text-[11px] text-slate-400">Optimal: 10 &ndash; 25 °C</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="temperature_val">20.0</span> <span class="text-xs font-normal">°C</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="temperature_slider"
+            min="0"
+            max="50"
+            step="0.1"
+            value="20.0"
+            oninput="updateParam('temperature', this.value, 1)"
+          >
+          <input type="hidden" id="temperature_input" name="temperature" value="20.0">
+        </div>
+      </div>
+
+      <!-- 10. Elektr o'tkazuvchanlik (EC) -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-100 flex flex-col justify-between space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚡</span>
+            <div>
+              <div class="text-sm font-bold text-slate-800">Elektr o‘tkazuvchanlik (EC)</div>
+              <div class="text-[11px] text-slate-400">Me’yor: ≤ 1000 μS/cm</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-base font-extrabold font-mono text-sky-600 w-16 text-right"><span id="ec_val">300</span> <span class="text-xs font-normal">μS/cm</span></div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <input
+            type="range"
+            id="ec_slider"
+            min="0"
+            max="2000"
+            step="1"
+            value="300"
+            oninput="updateParam('ec', this.value, 0)"
+          >
+          <input type="hidden" id="ec_input" name="ec" value="300">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Qo'shimcha parametr (ixtiyoriy) -->
+    <div class="glass-panel p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">⚙️</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Qo‘shimcha parametr:</span>
+      </div>
+      <select
+        id="extra_param"
+        name="extra_param"
+        class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none"
+      >
+        <option value="Tanlang">Tanlang</option>
+        <option value="DO (Erigan kislorod)">DO (Erigan kislorod)</option>
+        <option value="BOD (Biokimyoviy)">BOD (Biokimyoviy)</option>
+        <option value="COD (Kimyoviy kislorod)">COD (Kimyoviy kislorod)</option>
+        <option value="Ammiak">Ammiak</option>
+        <option value="Nitrat">Nitrat</option>
+        <option value="Nitrit">Nitrit</option>
+      </select>
+    </div>
+
+    <!-- Submit CTA Area (/opt/lampp/htdocs/waterai uslubida yashil tugma) -->
+    <div class="pt-4 text-center">
+      <button
+        type="submit"
+        class="w-full sm:w-auto px-12 py-4 rounded-2xl text-white font-extrabold text-base bg-[#18a65c] hover:bg-[#11894a] shadow-xl shadow-emerald-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-3 mx-auto pulse-glow"
+      >
+        <i class="fa-solid fa-magnifying-glass-chart text-lg"></i>
+        <span>🔍 &nbsp; Tahlil qilish va Natijani ko‘rish</span>
+      </button>
+      <p class="text-xs text-[#647991] mt-2 font-medium">
+        AI neyron tarmoq modeli SanPiN 0211-06 va JSST standartlari asosida to‘liq hisobot beradi
+      </p>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/analyze.js"></script>
+{% endblock %}

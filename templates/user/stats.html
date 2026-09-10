@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Umumiy Statistika va Monitoring — WaterAI Analysis{% endblock %}
+
+{% block content %}
+<div class="wide-container py-8 space-y-8">
+  
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 text-xs font-bold uppercase tracking-wider mb-2">
+        <i class="fa-solid fa-chart-pie"></i>
+        Analitika va Hisobotlar
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        Umumiy Suv Monitoringi Statistikasi
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Barcha tekshirilgan suv namunalari bo‘yicha umumiy sifat ko‘rsatkichlari va tahliliy grafiklar
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <a href="/analyze" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm shadow-sky-200 transition-all flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        <span>Yangi tahlil</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 4 Stats Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div class="glass-card p-5 rounded-2xl border border-sky-100">
+      <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jami namunalar</span>
+      <div class="mt-2 text-3xl font-black text-slate-800">{{ total_count }}</div>
+      <div class="mt-1 text-xs text-sky-600 font-semibold">Tizimda qayd etilgan</div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-emerald-100">
+      <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Yaroqli (Toza)</span>
+      <div class="mt-2 text-3xl font-black text-emerald-600">{{ valid_count }}</div>
+      <div class="mt-1 text-xs text-emerald-600/80">
+        {{ "%.0f"|format((valid_count / total_count * 100) if total_count > 0 else 0) }}% umumiy ulush
+      </div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-amber-100">
+      <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Shartli yaroqli</span>
+      <div class="mt-2 text-3xl font-black text-amber-600">{{ conditional_count }}</div>
+      <div class="mt-1 text-xs text-amber-600/80">
+        {{ "%.0f"|format((conditional_count / total_count * 100) if total_count > 0 else 0) }}% filtrlash kerak
+      </div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-rose-100">
+      <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Yaroqsiz</span>
+      <div class="mt-2 text-3xl font-black text-rose-600">{{ invalid_count }}</div>
+      <div class="mt-1 text-xs text-rose-600/80">
+        {{ "%.0f"|format((invalid_count / total_count * 100) if total_count > 0 else 0) }}% xavfli suvlar
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <!-- Doughnut Chart -->
+    <div class="glass-panel p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+      <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-chart-pie text-sky-500"></i>
+        Suv Sifatining Taqsimlanishi
+      </h3>
+      <div class="h-64 flex items-center justify-center">
+        <canvas id="qualityPieChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Average Parameters Bar Chart -->
+    <div class="glass-panel p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+      <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-chart-simple text-cyan-500"></i>
+        O‘rtacha ko‘rsatkichlar me’yorga nisbatan
+      </h3>
+      <div class="h-64 flex items-center justify-center">
+        <canvas id="normBarChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sources Breakdown Cards -->
+  <div class="glass-panel p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+      <i class="fa-solid fa-faucet-drip text-sky-500"></i>
+      Suv manbalari bo‘yicha statistika
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+      {% for s in source_stats %}
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ s.name }}</span>
+          <span class="text-lg">{{ s.icon }}</span>
+        </div>
+        <div class="text-2xl font-black text-slate-800">{{ s.count }} ta</div>
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>O‘rtacha WQI:</span>
+          <span class="font-bold text-sky-600">{{ "%.1f"|format(s.avg_score) }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. Doughnut Chart
+  const pieCtx = document.getElementById('qualityPieChart');
+  if (pieCtx) {
+    new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Yaroqli (Toza)', 'Shartli yaroqli', 'Yaroqsiz'],
+        datasets: [{
+          data: [{{ valid_count }}, {{ conditional_count }}, {{ invalid_count }}],
+          backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              font: { family: 'Plus Jakarta Sans', weight: '600' }
+            }
+          }
+        },
+        cutout: '65%'
+      }
+    });
+  }
+
+  // 2. Bar Chart
+  const barCtx = document.getElementById('normBarChart');
+  if (barCtx) {
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['pH (/8.5)', 'TDS (/1000)', 'Turbidlik (/5)', 'Qattiqlik (/200)', 'Sulfatlar (/250)'],
+        datasets: [{
+          label: 'Me’yorga nisbatan (%)',
+          data: [
+            {{ avg_ph_pct if avg_ph_pct is defined else 82 }},
+            {{ avg_tds_pct if avg_tds_pct is defined else 38 }},
+            {{ avg_turbidity_pct if avg_turbidity_pct is defined else 35 }},
+            {{ avg_hardness_pct if avg_hardness_pct is defined else 75 }},
+            {{ avg_sulfate_pct if avg_sulfate_pct is defined else 44 }}
+          ],
+          backgroundColor: ['#0284c7', '#0ea5e9', '#38bdf8', '#06b6d4', '#14b8a6'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) { return value + "%"; }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

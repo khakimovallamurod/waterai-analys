@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Tahlillar Tarixi — WaterAI Analysis{% endblock %}
+
+{% block content %}
+<div class="wide-container py-8 space-y-6">
+  
+  <!-- Sarlavha & CSV eksport -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+        <i class="fa-solid fa-clock-rotate-left text-sky-500"></i>
+        Tahlillar tarixi
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">
+        Barcha o‘tkazilgan suv sifati testlari va laboratoriya ko‘rsatkichlari
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <a href="/export/history/csv" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-sm transition-all flex items-center gap-2">
+        <i class="fa-solid fa-file-excel text-emerald-600"></i>
+        <span>Barchasini CSV ga yuklash</span>
+      </a>
+
+      <a href="/analyze" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm shadow-sky-200 transition-all flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        <span>Yangi tahlil</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtrlash tugmalari -->
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="/history" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all {% if not status_filter %}bg-sky-600 text-white shadow-sm{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+      Barchasi ({{ total_count }})
+    </a>
+    <a href="/history?status=valid" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all {% if status_filter == 'valid' %}bg-emerald-600 text-white shadow-sm{% else %}bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50{% endif %}">
+      🟢 Yaroqli ({{ valid_count }})
+    </a>
+    <a href="/history?status=conditional" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all {% if status_filter == 'conditional' %}bg-amber-500 text-white shadow-sm{% else %}bg-white text-amber-700 border border-amber-200 hover:bg-amber-50{% endif %}">
+      🟡 Shartli yaroqli ({{ conditional_count }})
+    </a>
+    <a href="/history?status=invalid" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all {% if status_filter == 'invalid' %}bg-rose-600 text-white shadow-sm{% else %}bg-white text-rose-700 border border-rose-200 hover:bg-rose-50{% endif %}">
+      🔴 Yaroqsiz ({{ invalid_count }})
+    </a>
+  </div>
+
+  <!-- Tahlillar jadvali (Desktop) va Kartalari (Mobile) -->
+  <div class="glass-panel rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    
+    {% if analyses and analyses|length > 0 %}
+    <!-- Desktop Table -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <th class="py-3.5 px-5">ID</th>
+            <th class="py-3.5 px-5">Namuna nomi</th>
+            <th class="py-3.5 px-5">Manba</th>
+            <th class="py-3.5 px-5">pH</th>
+            <th class="py-3.5 px-5">TDS</th>
+            <th class="py-3.5 px-5">Turbidlik</th>
+            <th class="py-3.5 px-5">Qattiqlik</th>
+            <th class="py-3.5 px-5">AI Bahosi</th>
+            <th class="py-3.5 px-5">Sana</th>
+            <th class="py-3.5 px-5 text-right">Amallar</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          {% for a in analyses %}
+          <tr class="hover:bg-sky-50/40 transition-colors">
+            <td class="py-3.5 px-5 font-mono text-xs text-slate-400">#{{ a.id }}</td>
+            <td class="py-3.5 px-5 font-bold text-slate-800">
+              <a href="/result/{{ a.id }}" class="hover:text-sky-600 transition-colors flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full {% if a.status == 'valid' %}bg-emerald-500{% elif a.status == 'conditional' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
+                {{ a.sample_name }}
+              </a>
+            </td>
+            <td class="py-3.5 px-5 text-slate-600">
+              <span class="px-2 py-0.5 rounded-md bg-slate-100 text-xs font-semibold text-slate-600">
+                {{ a.source_type }}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.2f"|format(a.ph) }}</td>
+            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.0f"|format(a.tds) }} mg/L</td>
+            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.1f"|format(a.turbidity) }} NTU</td>
+            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.0f"|format(a.hardness) }} mg/L</td>
+            <td class="py-3.5 px-5">
+              {% if a.status == 'valid' %}
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                🟢 Yaroqli
+              </span>
+              {% elif a.status == 'conditional' %}
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                🟡 Shartli yaroqli
+              </span>
+              {% else %}
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                🔴 Yaroqsiz
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-3.5 px-5 text-xs text-slate-400">
+              {{ a.created_at.strftime('%d.%m.%Y %H:%M') if a.created_at else '—' }}
+            </td>
+            <td class="py-3.5 px-5 text-right space-x-1">
+              <a href="/result/{{ a.id }}" class="inline-flex items-center p-1.5 rounded-lg text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 transition-colors" title="Batafsil">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <a href="/export/csv/{{ a.id }}" class="inline-flex items-center p-1.5 rounded-lg text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors" title="CSV">
+                <i class="fa-solid fa-file-csv"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards List -->
+    <div class="md:hidden divide-y divide-slate-100">
+      {% for a in analyses %}
+      <div class="p-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-600 uppercase">
+            {{ a.source_type }}
+          </span>
+          {% if a.status == 'valid' %}
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+            🟢 Yaroqli
+          </span>
+          {% elif a.status == 'conditional' %}
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700">
+            🟡 Shartli
+          </span>
+          {% else %}
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">
+            🔴 Yaroqsiz
+          </span>
+          {% endif %}
+        </div>
+
+        <a href="/result/{{ a.id }}" class="block font-bold text-slate-800 text-base hover:text-sky-600">
+          {{ a.sample_name }}
+        </a>
+
+        <div class="grid grid-cols-4 gap-2 text-center bg-slate-50 p-2.5 rounded-xl text-xs font-medium">
+          <div>
+            <div class="text-[10px] text-slate-400">pH</div>
+            <div class="font-bold">{{ "%.2f"|format(a.ph) }}</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">TDS</div>
+            <div class="font-bold">{{ "%.0f"|format(a.tds) }}</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Turbid</div>
+            <div class="font-bold">{{ "%.1f"|format(a.turbidity) }}</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400">Qattiqlik</div>
+            <div class="font-bold">{{ "%.0f"|format(a.hardness) }}</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] text-slate-400">
+            <i class="fa-regular fa-clock mr-1"></i>
+            {{ a.created_at.strftime('%d.%m.%Y %H:%M') if a.created_at else '—' }}
+          </span>
+          <div class="flex items-center gap-2">
+            <a href="/export/csv/{{ a.id }}" class="px-2.5 py-1 rounded-lg text-xs font-bold text-emerald-600 bg-emerald-50">
+              CSV
+            </a>
+            <a href="/result/{{ a.id }}" class="px-3 py-1 rounded-lg text-xs font-bold text-white bg-sky-600">
+              Ko‘rish
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-16">
+      <div class="w-16 h-16 rounded-full bg-sky-50 text-sky-500 mx-auto flex items-center justify-center text-2xl mb-3">
+        <i class="fa-solid fa-folder-open"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-700">Tahlillar topilmadi</h3>
+      <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+        Kiritilgan mezon bo‘yicha tahlillar mavjud emas. Yangi suv tahlilini o‘tkazib ko‘ring.
+      </p>
+      <a href="/analyze" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm transition-all">
+        <i class="fa-solid fa-plus"></i>
+        <span>Yangi tahlil kiritish</span>
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}

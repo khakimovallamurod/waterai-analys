@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrator Paneli — WaterAI Analysis{% endblock %}
+
+{% block content %}
+<div class="wide-container py-8 space-y-8">
+  
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider mb-2">
+        <i class="fa-solid fa-shield-halved"></i>
+        Tizim Boshqaruvi
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        Administrator Paneli
+      </h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Barcha foydalanuvchilar, laboratoriya tahlillari va tizim parametrlarini boshqarish
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <a href="/export/history/csv" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-sm transition-all flex items-center gap-2">
+        <i class="fa-solid fa-file-csv text-emerald-600"></i>
+        <span>Barcha ma'lumotlarni CSV ga yuklash</span>
+      </a>
+      <a href="/analyze" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm shadow-sky-200 transition-all flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        <span>Yangi tahlil</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Metric Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    
+    <div class="glass-card p-5 rounded-2xl border border-purple-100">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-purple-600">Foydalanuvchilar</span>
+        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+      <div class="mt-3 text-3xl font-black text-slate-800">{{ users|length if users else 0 }}</div>
+      <div class="mt-1 text-xs text-slate-500">Ro‘yxatdan o‘tgan faol hisoblar</div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-sky-100">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-sky-600">Jami tahlillar</span>
+        <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-flask-vial"></i>
+        </div>
+      </div>
+      <div class="mt-3 text-3xl font-black text-slate-800">{{ analyses|length if analyses else 0 }}</div>
+      <div class="mt-1 text-xs text-slate-500">Barcha o‘tkazilgan testlar</div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-emerald-100">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Yaroqli suvlar</span>
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+      </div>
+      <div class="mt-3 text-3xl font-black text-emerald-600">{{ valid_count }}</div>
+      <div class="mt-1 text-xs text-emerald-600/80">
+        {{ "%.0f"|format((valid_count / (analyses|length if analyses|length > 0 else 1)) * 100) }}% toza suv ulushi
+      </div>
+    </div>
+
+    <div class="glass-card p-5 rounded-2xl border border-rose-100">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Yaroqsiz suvlar</span>
+        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+      </div>
+      <div class="mt-3 text-3xl font-black text-rose-600">{{ invalid_count }}</div>
+      <div class="mt-1 text-xs text-rose-600/80">Xavfli namunalar soni</div>
+    </div>
+
+  </div>
+
+  <!-- Users Table Section -->
+  <div class="glass-panel rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Foydalanuvchilar Boshqaruvi</h2>
+          <p class="text-xs text-slate-500">Tizimga a'zo barcha foydalanuvchilar va ularning huquqlari</p>
+        </div>
+      </div>
+      <span class="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full">
+        {{ users|length }} ta hisob
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <th class="py-3 px-6">ID</th>
+            <th class="py-3 px-6">F.I.SH</th>
+            <th class="py-3 px-6">Telefon</th>
+            <th class="py-3 px-6">Roli</th>
+            <th class="py-3 px-6">Tahlillar soni</th>
+            <th class="py-3 px-6">Ro‘yxat sanasi</th>
+            <th class="py-3 px-6 text-right">Amal</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          {% for u in users %}
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-6 font-mono text-xs text-slate-400">#{{ u.id }}</td>
+            <td class="py-3.5 px-6 font-bold text-slate-800 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-purple-600 text-white flex items-center justify-center text-xs font-bold">
+                {{ u.full_name[:1] if u.full_name else 'U' }}
+              </div>
+              <span>{{ u.full_name }}</span>
+            </td>
+            <td class="py-3.5 px-6 font-mono text-xs text-slate-600">{{ u.phone }}</td>
+            <td class="py-3.5 px-6">
+              {% if u.role == 'admin' %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                <i class="fa-solid fa-shield-halved text-[10px] mr-1"></i> Admin
+              </span>
+              {% else %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                Foydalanuvchi
+              </span>
+              {% endif %}
+            </td>
+            <td class="py-3.5 px-6 font-bold text-slate-700">{{ u.analyses|length }} ta</td>
+            <td class="py-3.5 px-6 text-xs text-slate-400">{{ u.created_at.strftime('%d.%m.%Y') if u.created_at else '—' }}</td>
+            <td class="py-3.5 px-6 text-right">
+              <form action="/admin/user/toggle-role/{{ u.id }}" method="POST" class="inline" onsubmit="return confirm('Foydalanuvchi rolini o‘zgartirmoqchimisiz?');">
+                <button type="submit" class="text-xs font-bold px-2.5 py-1 rounded-lg border {% if u.role == 'admin' %}border-slate-300 text-slate-600 hover:bg-slate-100{% else %}border-purple-300 text-purple-700 hover:bg-purple-50{% endif %} transition-colors">
+                  {% if u.role == 'admin' %}User qilish{% else %}Admin qilish{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- All Water Analyses Table Section -->
+  <div class="glass-panel rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-vial"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Barcha Suv Namunasi Tahlillari</h2>
+          <p class="text-xs text-slate-500">Laboratoriyada tekshirilgan barcha suv namunalari jurnali</p>
+        </div>
+      </div>
+      <span class="text-xs font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full">
+        Jami: {{ analyses|length }} ta
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <th class="py-3 px-5">ID</th>
+            <th class="py-3 px-5">Namuna nomi</th>
+            <th class="py-3 px-5">Manba</th>
+            <th class="py-3 px-5">Foydalanuvchi</th>
+            <th class="py-3 px-5">WQI Indeks</th>
+            <th class="py-3 px-5">Holat</th>
+            <th class="py-3 px-5">Sana</th>
+            <th class="py-3 px-5 text-right">Amallar</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 text-sm font-medium">
+          {% for a in analyses %}
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="py-3.5 px-5 font-mono text-xs text-slate-400">#{{ a.id }}</td>
+            <td class="py-3.5 px-5 font-bold text-slate-800">
+              <a href="/result/{{ a.id }}" class="hover:text-sky-600 transition-colors flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full {% if a.status == 'valid' %}bg-emerald-500{% elif a.status == 'conditional' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
+                {{ a.sample_name }}
+              </a>
+            </td>
+            <td class="py-3.5 px-5 text-slate-600">
+              <span class="px-2 py-0.5 rounded-md bg-slate-100 text-xs font-semibold">
+                {{ a.source_type }}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-xs text-slate-600">
+              {{ a.user.full_name if a.user else 'Mehmon' }}
+            </td>
+            <td class="py-3.5 px-5 font-mono text-xs font-bold {% if a.status == 'valid' %}text-emerald-600{% elif a.status == 'conditional' %}text-amber-600{% else %}text-rose-600{% endif %}">
+              {{ "%.1f"|format(a.quality_score) }} / 100
+            </td>
+            <td class="py-3.5 px-5">
+              {% if a.status == 'valid' %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">🟢 Yaroqli</span>
+              {% elif a.status == 'conditional' %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">🟡 Shartli</span>
+              {% else %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">🔴 Yaroqsiz</span>
+              {% endif %}
+            </td>
+            <td class="py-3.5 px-5 text-xs text-slate-400">
+              {{ a.created_at.strftime('%d.%m.%Y %H:%M') if a.created_at else '—' }}
+            </td>
+            <td class="py-3.5 px-5 text-right space-x-1">
+              <a href="/result/{{ a.id }}" class="inline-flex items-center p-1.5 rounded-lg text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 transition-colors" title="Ko‘rish">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <a href="/export/csv/{{ a.id }}" class="inline-flex items-center p-1.5 rounded-lg text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-colors" title="CSV">
+                <i class="fa-solid fa-file-csv"></i>
+              </a>
+              <form action="/admin/analysis/delete/{{ a.id }}" method="POST" class="inline" onsubmit="return confirm('Ushbu tahlilni o‘chirmoqchimisiz?');">
+                <button type="submit" class="inline-flex items-center p-1.5 rounded-lg text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors" title="O‘chirish">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

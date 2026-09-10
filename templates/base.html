@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full bg-[#e9f0f7]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{% block title %}WaterAI — Suv Sifatini Sun'iy Intellekt Bilan Tahlil Qilish{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/static/images/logo.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            water: {
+              50: '#f5fbff',
+              100: '#e4f5ff',
+              200: '#c5eaff',
+              300: '#92d6ff',
+              400: '#4fb8ff',
+              500: '#078be5', /* /opt/lampp/htdocs/waterai primary blue */
+              600: '#0574c1',
+              700: '#045c9c',
+              800: '#183e70', /* /opt/lampp/htdocs/waterai navy */
+              900: '#123c70', /* /opt/lampp/htdocs/waterai dark navy */
+              950: '#12345b',
+            },
+            watergreen: {
+              50: '#eafaf2',
+              100: '#d0f5e1',
+              500: '#18a65c', /* /opt/lampp/htdocs/waterai green */
+              600: '#11894a',
+              700: '#0e733e'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Vanilla Tilt CDN (3D interactive card effect) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/custom.css">
+
+  {% block head %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen text-[#12345b] antialiased selection:bg-[#078be5] selection:text-white relative">
+
+  <!-- 🖱️ Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-outline"></div>
+
+  <!-- 🌌 Background Animated Particles -->
+  <div id="particles-bg"></div>
+
+  <!-- Desktop Header / Navbar -->
+  {% include 'components/navbar.html' %}
+
+  <!-- Flash Alerts -->
+  {% include 'components/alert.html' %}
+
+  <!-- Main Content Container (Wide & Edge-to-Edge Responsive) -->
+  <main class="flex-grow relative z-10 w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer (Desktop & Tablet) -->
+  {% include 'components/footer.html' %}
+
+  <!-- 📱 Mobil uchun Bottom Menu (kichik ekranlarda ko'rinadi) -->
+  {% include 'components/bottom_menu.html' %}
+
+  <!-- Global Scripts -->
+  <script src="/static/js/main.js"></script>
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

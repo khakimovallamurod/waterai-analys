@@ -1,0 +1,73 @@
+<!-- =========================================================
+     📱 Mobil Pastki Navigatsiya Menyu (Bottom Navigation Bar)
+     Faqat kichik ekranlarda (md:hidden) ko'rinadi
+     ========================================================= -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-panel border-t border-sky-100 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl bg-white/90 transition-all">
+  <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between relative">
+    
+    <!-- 1. Bosh sahifa -->
+    <a href="/" class="flex flex-col items-center justify-center w-14 py-1 group {% if active_page == 'home' %}text-sky-600 font-bold{% else %}text-slate-500 hover:text-sky-600{% endif %} transition-all">
+      <div class="relative">
+        <i class="fa-solid fa-house text-lg {% if active_page == 'home' %}scale-110 text-sky-600{% endif %} transition-transform"></i>
+        {% if active_page == 'home' %}
+        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
+        {% endif %}
+      </div>
+      <span class="text-[10px] mt-1 font-medium tracking-tight">Asosiy</span>
+    </a>
+
+    <!-- 2. Tarix -->
+    <a href="/history" class="flex flex-col items-center justify-center w-14 py-1 group {% if active_page == 'history' %}text-sky-600 font-bold{% else %}text-slate-500 hover:text-sky-600{% endif %} transition-all">
+      <div class="relative">
+        <i class="fa-solid fa-clock-rotate-left text-lg {% if active_page == 'history' %}scale-110 text-sky-600{% endif %} transition-transform"></i>
+        {% if active_page == 'history' %}
+        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
+        {% endif %}
+      </div>
+      <span class="text-[10px] mt-1 font-medium tracking-tight">Tarix</span>
+    </a>
+
+    <!-- 3. Markaziy Ko'tarilgan "+ Tahlil" Tugmasi -->
+    <div class="relative -top-5 flex flex-col items-center">
+      <a href="/analyze" class="w-14 h-14 rounded-full bg-gradient-to-tr from-sky-500 via-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-sky-300/80 border-4 border-white transition-all transform active:scale-95 pulse-glow group" title="Yangi Tahlil">
+        <i class="fa-solid fa-flask-vial text-xl group-hover:rotate-12 transition-transform"></i>
+      </a>
+      <span class="text-[10px] font-bold text-sky-700 mt-1">Tahlil</span>
+    </div>
+
+    <!-- 4. Statistika / Admin -->
+    {% if current_user and current_user.role == 'admin' %}
+    <a href="/admin" class="flex flex-col items-center justify-center w-14 py-1 group {% if active_page == 'admin' %}text-purple-600 font-bold{% else %}text-slate-500 hover:text-purple-600{% endif %} transition-all">
+      <div class="relative">
+        <i class="fa-solid fa-shield-halved text-lg {% if active_page == 'admin' %}scale-110 text-purple-600{% endif %} transition-transform"></i>
+        {% if active_page == 'admin' %}
+        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-purple-600 rounded-full"></span>
+        {% endif %}
+      </div>
+      <span class="text-[10px] mt-1 font-medium tracking-tight">Admin</span>
+    </a>
+    {% else %}
+    <a href="/stats" class="flex flex-col items-center justify-center w-14 py-1 group {% if active_page == 'stats' %}text-sky-600 font-bold{% else %}text-slate-500 hover:text-sky-600{% endif %} transition-all">
+      <div class="relative">
+        <i class="fa-solid fa-chart-pie text-lg {% if active_page == 'stats' %}scale-110 text-sky-600{% endif %} transition-transform"></i>
+        {% if active_page == 'stats' %}
+        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
+        {% endif %}
+      </div>
+      <span class="text-[10px] mt-1 font-medium tracking-tight">Statistika</span>
+    </a>
+    {% endif %}
+
+    <!-- 5. Profil -->
+    <a href="{% if current_user %}/profile{% else %}/login{% endif %}" class="flex flex-col items-center justify-center w-14 py-1 group {% if active_page == 'profile' %}text-sky-600 font-bold{% else %}text-slate-500 hover:text-sky-600{% endif %} transition-all">
+      <div class="relative">
+        <i class="fa-solid fa-user text-lg {% if active_page == 'profile' %}scale-110 text-sky-600{% endif %} transition-transform"></i>
+        {% if active_page == 'profile' %}
+        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
+        {% endif %}
+      </div>
+      <span class="text-[10px] mt-1 font-medium tracking-tight">Profil</span>
+    </a>
+
+  </div>
+</nav>

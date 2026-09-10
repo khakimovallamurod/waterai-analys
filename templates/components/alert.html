@@ -1,0 +1,19 @@
+{% if alert_message %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+  <div class="alert-toast flex items-center justify-between p-4 rounded-xl border {% if alert_type == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% elif alert_type == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %} shadow-sm transition-all duration-300">
+    <div class="flex items-center gap-3">
+      {% if alert_type == 'error' %}
+      <i class="fa-solid fa-triangle-exclamation text-lg text-rose-500"></i>
+      {% elif alert_type == 'warning' %}
+      <i class="fa-solid fa-circle-exclamation text-lg text-amber-500"></i>
+      {% else %}
+      <i class="fa-solid fa-circle-check text-lg text-emerald-500"></i>
+      {% endif %}
+      <span class="text-sm font-medium">{{ alert_message }}</span>
+    </div>
+    <button onclick="this.closest('.alert-toast').remove()" class="text-slate-400 hover:text-slate-600 p-1">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+</div>
+{% endif %}

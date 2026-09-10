@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Suv sifatini aniqlash — AI tizimi | WaterAI Analysis{% endblock %}
+
+{% block content %}
+<div class="space-y-16 w-full">
+  
+  <!-- =========================================================================
+       SECTION 1: BOSH SAHIFA & HERO (/opt/lampp/htdocs/waterai uslubida)
+       ========================================================================= -->
+  <section id="home" class="relative header-wave-bg pt-12 pb-24 border-b border-[#e0edf7]">
+    <div class="wide-container text-center relative z-10">
+      
+      <!-- Clean Centered Logo (as in /opt/lampp/htdocs/waterai) -->
+      <div class="flex justify-center items-center mb-4">
+        <img src="/static/images/logo.png" alt="SuvAI Logo" class="w-20 h-20 sm:w-24 sm:h-24 object-contain filter drop-shadow hover:scale-105 transition-transform duration-300">
+      </div>
+
+      <!-- Badge (cleanly spaced below logo) -->
+      <div class="mb-5">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-[#d5e2ed] text-xs font-bold text-[#183e70] uppercase tracking-wider shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-[#18a65c] animate-pulse"></span>
+          SamDU “Sun’iy intellekt laboratoriyasi” • SanPiN 0211-06
+        </span>
+      </div>
+
+      <!-- Main Title (as in /opt/lampp/htdocs/waterai/components/header.php) -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#123c70] tracking-tight max-w-4xl mx-auto leading-tight">
+        Suv sifatini aniqlashning <span class="text-[#078be5]">sun’iy intellekt</span> tizimi
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="mt-4 text-base sm:text-xl text-[#61748a] font-medium max-w-2xl mx-auto">
+        Toza suv – sog‘lom hayot!
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="/analyze" class="px-8 py-4 rounded-2xl font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-xl shadow-emerald-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base pulse-glow">
+          <i class="fa-solid fa-flask-vial text-lg"></i>
+          <span>Yangi Tahlil Qilish</span>
+        </a>
+
+        <a href="/stats" class="px-8 py-4 rounded-2xl font-bold text-white bg-[#078be5] hover:bg-[#0574c1] shadow-xl shadow-sky-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base">
+          <i class="fa-solid fa-chart-simple text-lg"></i>
+          <span>📊 Statistika</span>
+        </a>
+
+        <a href="/history" class="px-7 py-4 rounded-2xl font-bold text-[#183e70] bg-white hover:bg-[#f5fbff] border border-[#d5e2ed] shadow-md transition-all flex items-center gap-2 text-base">
+          <i class="fa-solid fa-clock-rotate-left text-sm text-[#078be5]"></i>
+          <span>Tahlillar tarixi</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Bottom Wave Shape Curve -->
+    <div class="water-wave-curve">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="#e9f0f7"></path>
+      </svg>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SUMMARY METRIC CARDS (WIDE RESPONSIVE GRID)
+       ========================================================================= -->
+  <section class="wide-container -mt-8 relative z-20">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      
+      <div class="glass-card p-6 bg-white border border-[#e0edf7] rounded-3xl shadow-lg shadow-sky-900/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Jami tahlillar</span>
+          <div class="w-12 h-12 rounded-2xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-xl">
+            <i class="fa-solid fa-flask"></i>
+          </div>
+        </div>
+        <div class="mt-4 text-3xl sm:text-4xl font-black text-[#123c70]">
+          {{ total_count if total_count is defined else (analyses|length if analyses else 0) }}
+        </div>
+        <div class="mt-1 text-xs text-[#647991]">
+          Barcha tekshirilgan suv namunalari
+        </div>
+      </div>
+
+      <div class="glass-card p-6 bg-white border border-[#b9e8cf] rounded-3xl shadow-lg shadow-emerald-900/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#11894a]">Yaroqli (Toza)</span>
+          <div class="w-12 h-12 rounded-2xl bg-[#eafaf2] text-[#18a65c] flex items-center justify-center text-xl">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        </div>
+        <div class="mt-4 text-3xl sm:text-4xl font-black text-[#18a65c]">
+          {{ valid_count if valid_count is defined else 0 }}
+        </div>
+        <div class="mt-1 text-xs text-[#11894a]/80">
+          Iste’mol uchun to‘liq xavfsiz suvlar
+        </div>
+      </div>
+
+      <div class="glass-card p-6 bg-white border border-amber-200 rounded-3xl shadow-lg shadow-amber-900/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Shartli yaroqli</span>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+        </div>
+        <div class="mt-4 text-3xl sm:text-4xl font-black text-amber-600">
+          {{ conditional_count if conditional_count is defined else 0 }}
+        </div>
+        <div class="mt-1 text-xs text-amber-700/80">
+          Filtrlash yoki qaynatish talab etiladi
+        </div>
+      </div>
+
+      <div class="glass-card p-6 bg-white border border-rose-200 rounded-3xl shadow-lg shadow-rose-900/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Yaroqsiz</span>
+          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-ban"></i>
+          </div>
+        </div>
+        <div class="mt-4 text-3xl sm:text-4xl font-black text-rose-600">
+          {{ invalid_count if invalid_count is defined else 0 }}
+        </div>
+        <div class="mt-1 text-xs text-rose-700/80">
+          Iste’mol uchun xavfli deb topilgan
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION: SO'NGGI TAHLILLAR JURNALI
+       ========================================================================= -->
+  <section class="wide-container">
+    <div class="glass-panel rounded-3xl p-6 sm:p-8 bg-white border border-[#e0edf7] shadow-sm">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f5fbff] text-[#078be5] text-xs font-bold uppercase tracking-wider mb-1">
+            <i class="fa-solid fa-list-check"></i>
+            Monitoring Jurnali
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-[#123c70]">
+            So‘nggi o‘tkazilgan tahlillar
+          </h2>
+          <p class="text-xs sm:text-sm text-[#61748a] mt-0.5">
+            Suv namunalarining eng so‘nggi kimyoviy-fizik ko‘rsatkichlari va sun’iy intellekt xulosalari
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="/analyze" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-sm transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i>
+            <span>Yangi tahlil</span>
+          </a>
+          <a href="/history" class="px-4 py-2 rounded-xl text-xs font-bold text-[#078be5] bg-[#e4f5ff] hover:bg-[#c5eaff] transition-all flex items-center gap-1">
+            <span>Barchasi ({{ analyses|length }})</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+
+      {% if analyses and analyses|length > 0 %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-[#e0edf7] bg-[#f5fbff] text-xs font-bold uppercase tracking-wider text-[#61748a]">
+              <th class="py-3.5 px-5">ID</th>
+              <th class="py-3.5 px-5">Namuna nomi</th>
+              <th class="py-3.5 px-5">Manba</th>
+              <th class="py-3.5 px-5">pH</th>
+              <th class="py-3.5 px-5">TDS</th>
+              <th class="py-3.5 px-5">Turbidlik</th>
+              <th class="py-3.5 px-5">WQI Indeksi</th>
+              <th class="py-3.5 px-5">AI Bahosi</th>
+              <th class="py-3.5 px-5">Sana</th>
+              <th class="py-3.5 px-5 text-right">Amal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#e0edf7] text-sm font-medium">
+            {% for a in analyses[:6] %}
+            <tr class="hover:bg-[#f5fbff]/70 transition-colors">
+              <td class="py-3.5 px-5 font-mono text-xs text-[#647991]">#{{ a.id }}</td>
+              <td class="py-3.5 px-5 font-bold text-[#123c70]">
+                <a href="/result/{{ a.id }}" class="hover:text-[#078be5] transition-colors flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full {% if a.status == 'valid' %}bg-[#18a65c]{% elif a.status == 'conditional' %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
+                  {{ a.sample_name }}
+                </a>
+              </td>
+              <td class="py-3.5 px-5 text-[#183e70]">
+                <span class="px-2.5 py-1 rounded-lg bg-[#e9f0f7] text-xs font-semibold text-[#183e70]">
+                  {{ a.source_type }}
+                </span>
+              </td>
+              <td class="py-3.5 px-5 font-mono text-xs text-[#12345b]">{{ "%.2f"|format(a.ph) }}</td>
+              <td class="py-3.5 px-5 font-mono text-xs text-[#12345b]">{{ "%.0f"|format(a.tds) }} mg/L</td>
+              <td class="py-3.5 px-5 font-mono text-xs text-[#12345b]">{{ "%.1f"|format(a.turbidity) }} NTU</td>
+              <td class="py-3.5 px-5 font-mono text-xs font-extrabold {% if a.status == 'valid' %}text-[#18a65c]{% elif a.status == 'conditional' %}text-amber-600{% else %}text-rose-600{% endif %}">
+                {{ "%.1f"|format(a.quality_score) }} / 100
+              </td>
+              <td class="py-3.5 px-5">
+                {% if a.status == 'valid' %}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#eafaf2] text-[#11894a] border border-[#b9e8cf]">
+                  🟢 Yaroqli
+                </span>
+                {% elif a.status == 'conditional' %}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                  🟡 Shartli
+                </span>
+                {% else %}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                  🔴 Yaroqsiz
+                </span>
+                {% endif %}
+              </td>
+              <td class="py-3.5 px-5 text-xs text-[#647991]">
+                {{ a.created_at.strftime('%d.%m.%Y %H:%M') if a.created_at else '—' }}
+              </td>
+              <td class="py-3.5 px-5 text-right space-x-1">
+                <a href="/result/{{ a.id }}" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold text-[#078be5] bg-[#e4f5ff] hover:bg-[#c5eaff] transition-colors">
+                  <i class="fa-solid fa-eye mr-1"></i> Ko‘rish
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-[#f0f7fc] text-[#078be5] mx-auto flex items-center justify-center text-2xl mb-3">
+          <i class="fa-solid fa-flask"></i>
+        </div>
+        <h3 class="text-base font-bold text-[#123c70]">Hozircha tahlillar mavjud emas</h3>
+        <p class="text-xs text-[#647991] mt-1 max-w-sm mx-auto">
+          Suv namunasi ko‘rsatkichlarini kiritib, birinchi AI tahlilini o‘tkazing.
+        </p>
+        <a href="/analyze" class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-sm transition-all">
+          <i class="fa-solid fa-plus"></i>
+          <span>Tahlil kiritish</span>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 2: BIZ HAQIMIZDA (ABOUT SECTION)
+       ========================================================================= -->
+  <section id="about" class="wide-container scroll-mt-20">
+    <div class="rounded-3xl p-8 sm:p-12 bg-white border border-[#e0edf7] shadow-sm space-y-10">
+      
+      <!-- Sarlavha -->
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f0f7fc] text-[#078be5] text-xs font-bold uppercase tracking-wider">
+          <i class="fa-solid fa-graduation-cap"></i>
+          Samarqand Davlat Universiteti
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-black text-[#123c70] tracking-tight">
+          Biz Haqimizda &amp; Sun’iy Intellekt Laboratoriyasi
+        </h2>
+        <p class="text-sm sm:text-base text-[#61748a] leading-relaxed">
+          Ushbu ilmiy-amaliy dasturiy platforma <b>Samarqand davlat universiteti</b> “Sun’iy intellekt laboratoriyasi” tadqiqotchilari tomonidan ishlab chiqilgan bo‘lib, mas’ul: <b>Salimova Maxbuba</b>.
+        </p>
+      </div>
+
+      <!-- 3 Asosiy Ustun Kartalari -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <h3 class="text-lg font-bold text-[#123c70]">AI va Neyron Tarmoq</h3>
+          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+            10 dan ortiq asosiy fizik-kimyoviy parametrlar (pH, TDS, qattiqlik, turbidlik, sulfatlar va h.k.) o‘rtasidagi nochiziqli bog‘liqlikni chuqur tahlil qilib, suvning umumiy sifat indeksini (WQI) aniqlaydi.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-[#eafaf2] text-[#18a65c] flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-shield-check"></i>
+          </div>
+          <h3 class="text-lg font-bold text-[#123c70]">SanPiN 0211-06 va JSST</h3>
+          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+            O‘zbekiston Respublikasi davlat sanitariya standartlari (SanPiN 0211-06) va Jahon Sog‘liqni Saqlash Tashkiloti (WHO) talablari asosida me’yoriy chegaralar qat’iy nazorat qilinadi.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-[#f0f7fc] text-[#0574c1] flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+          <h3 class="text-lg font-bold text-[#123c70]">Mos Tozalash Tavsiyasi</h3>
+          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+            Har bir suv namunasining sifatiga qarab 6 xil yo‘nalishda (ichimlik, pishirish, maishiy, bolalar uchun) foydalanish ko‘rsatmalari hamda teskari osmos yoki uglerodli filtrlash usullari avtomatik beriladi.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- University Credentials Banner -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123c70] to-[#183e70] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div class="space-y-2 text-center md:text-left">
+          <div class="text-xs font-bold uppercase tracking-wider text-sky-300">
+            Ilmiy Loyiha Raxbari va Mas'uli
+          </div>
+          <h4 class="text-xl sm:text-2xl font-black">
+            Salimova Maxbuba &mdash; Samarqand Davlat Universiteti
+          </h4>
+          <p class="text-xs sm:text-sm text-sky-100 max-w-2xl">
+            Aholini toza ichimlik suvi bilan ta’minlash, suv manbalarining ekologik barqarorligini nazorat qilish va AI yordamida tezkor monitoring tizimlarini rivojlantirish.
+          </p>
+        </div>
+
+        <div class="flex-shrink-0 text-center">
+          <div class="text-3xl font-black text-emerald-400">💧 Toza suv</div>
+          <div class="text-xs text-sky-200 mt-0.5">Barqaror kelajak kafolati!</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 3: BOG'LANISH VA LABORATORIYA (CONTACT SECTION)
+       ========================================================================= -->
+  <section id="contact" class="wide-container scroll-mt-20">
+    <div class="rounded-3xl p-8 sm:p-12 bg-white border border-[#e0edf7] shadow-sm space-y-8">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f0f7fc] text-[#078be5] text-xs font-bold uppercase tracking-wider">
+          <i class="fa-solid fa-envelope-open-text"></i>
+          Aloqa &amp; Maslahat
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-black text-[#123c70] tracking-tight">
+          Laboratoriya Bilan Bog‘lanish
+        </h2>
+        <p class="text-xs sm:text-sm text-[#61748a]">
+          Suv tahlillari, ilmiy hamkorlik yoki sensorlar integratsiyasi bo‘yicha savollaringiz bormi? Biz bilan bog‘laning.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Contact Information Cards (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Manzil</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">Samarqand shahri, Intellektual Tizimlar va Kompyuter Texnologiyalari fakulteti</div>
+              <div class="text-xs text-[#647991]">Samarqand davlat universiteti (SamDU)</div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#eafaf2] text-[#18a65c] flex-shrink-0 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Mas’ul Shaxs</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">Salimova Maxbuba</div>
+              <div class="text-xs text-[#647991]">“Sun’iy intellekt laboratoriyasi” koordinatori</div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Telefon</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">+998 (71) 200-00-00</div>
+              <div class="text-xs text-[#647991]">Dush &ndash; Juma, 09:00 &ndash; 18:00</div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Elektron pochta</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">info@waterai.uz</div>
+              <div class="text-xs text-[#647991]">lab@samdu.uz</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Google Map Xaritasi (7 cols) -->
+        <div class="lg:col-span-7 rounded-2xl overflow-hidden border border-[#e0edf7] shadow-md bg-white flex flex-col">
+          <div class="p-4 bg-[#f5fbff] border-b border-[#e0edf7] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-base">
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-[#123c70]">Xaritadagi Manzil</h3>
+                <p class="text-xs text-[#61748a]">Intellektual Tizimlar va Kompyuter Texnologiyalari fakulteti, SamDU</p>
+              </div>
+            </div>
+            <a href="https://maps.app.goo.gl/xXjiVL8BGdERww936" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-[#078be5] hover:bg-[#0574c1] shadow-sm transition-all flex items-center gap-1.5 self-end sm:self-auto">
+              <span>Kattaroq xaritada ochish</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+          </div>
+          <div class="relative w-full h-[360px] sm:h-[400px] flex-grow">
+            <iframe
+              src="https://maps.google.com/maps?q=39.6383329,66.969261&hl=uz&z=17&output=embed"
+              width="100%"
+              height="100%"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              class="w-full h-full"
+            ></iframe>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+</div>
+{% endblock %}

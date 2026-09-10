@@ -1,0 +1,394 @@
+/* =========================================================
+   WaterAI Analysis — Custom Styling & Animations
+   Aqua / Deep Ocean / Clean Water aesthetic
+   Ranglar va uslub: /opt/lampp/htdocs/waterai va /opt/lampp/htdocs/itmarkaz-system
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Ranglar palitrasi /opt/lampp/htdocs/waterai dan */
+  --water-primary: #078be5;
+  --water-primary-hover: #0574c1;
+  --water-navy: #123c70;
+  --water-navy-dark: #12345b;
+  --water-navy-light: #183e70;
+  --water-muted: #61748a;
+  --water-muted-light: #647991;
+  --water-bg: #e9f0f7;
+  --water-section: #f5fbff;
+  --water-border: #e0edf7;
+  --water-border-alt: #d5e2ed;
+  
+  /* Holat ranglari */
+  --water-green: #18a65c;
+  --water-green-hover: #11894a;
+  --water-green-bg: #eafaf2;
+  --water-green-border: #b9e8cf;
+  
+  --water-amber: #f59e0b;
+  --water-rose: #f43f5e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--water-bg);
+  color: var(--water-navy-dark);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   🖱️ Custom Cursor (Landing & Desktop)
+   ========================================================= */
+#cursor-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--water-primary);
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 0 10px rgba(7, 139, 229, 0.8);
+}
+
+#cursor-outline {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(7, 139, 229, 0.45);
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+#cursor-outline.cursor-hover {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(7, 139, 229, 0.85);
+  background-color: rgba(7, 139, 229, 0.08);
+}
+
+@media (max-width: 768px) {
+  #cursor-dot, #cursor-outline {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   🌌 Background Particles / Animated Canvas
+   ========================================================= */
+#particles-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Glassmorphism & Card Styles
+   ========================================================= */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--water-border);
+  box-shadow: 0 8px 30px rgba(18, 60, 112, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--water-border);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -5px rgba(18, 60, 112, 0.06), 0 4px 12px -2px rgba(18, 60, 112, 0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 35px -5px rgba(7, 139, 229, 0.12), 0 8px 15px -3px rgba(18, 60, 112, 0.04);
+  border-color: rgba(7, 139, 229, 0.3);
+}
+
+/* =========================================================
+   🌊 Water Waves & Background Elements
+   ========================================================= */
+.header-wave-bg {
+  background: linear-gradient(180deg, #ffffff 0%, #f5fbff 65%, #e4f5ff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.water-wave-curve {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.water-wave-curve svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 60px;
+}
+
+/* =========================================================
+   💧 WaterAI: Water Droplet Splash & Crystal Emergence Animation
+   (Unique hydrodynamic splash, concentric liquid wave ripples & crystal bloom)
+   ========================================================= */
+.water-drop-stage {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 1. Falling glowing water drop */
+.water-splash-drop {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 16px;
+  height: 22px;
+  margin-left: -8px;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #078be5 60%, #045c9c 100%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 0 12px rgba(7, 139, 229, 0.8);
+  animation: waterDropFall 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+  z-index: 20;
+}
+
+@keyframes waterDropFall {
+  0% {
+    transform: translateY(-80px) scale(0.6, 1.4);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  85% {
+    transform: translateY(35px) scale(0.8, 1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(45px) scale(1.6, 0.3);
+    opacity: 0;
+  }
+}
+
+/* 2. Concentric expanding liquid ripples */
+.water-ripple-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 2px solid #078be5;
+  box-shadow: 0 0 15px rgba(7, 139, 229, 0.4), inset 0 0 10px rgba(7, 139, 229, 0.2);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.ripple-1 {
+  animation: waterRippleExpand 2s cubic-bezier(0.25, 1, 0.5, 1) 0.4s infinite;
+}
+
+.ripple-2 {
+  animation: waterRippleExpand 2s cubic-bezier(0.25, 1, 0.5, 1) 0.8s infinite;
+}
+
+.ripple-3 {
+  animation: waterRippleExpand 2s cubic-bezier(0.25, 1, 0.5, 1) 1.2s infinite;
+}
+
+@keyframes waterRippleExpand {
+  0% {
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0.9;
+    border-color: rgba(7, 139, 229, 0.8);
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    width: 140px;
+    height: 140px;
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+    border-color: rgba(7, 139, 229, 0);
+  }
+}
+
+/* 3. WaterAI Crystal Logo emerging smoothly from the splash center */
+.water-crystal-logo {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  z-index: 10;
+  animation: waterCrystalBloom 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.42s both,
+             waterFloatGentle 5s ease-in-out 1.7s infinite;
+  filter: drop-shadow(0 12px 20px rgba(7, 139, 229, 0.35));
+}
+
+@keyframes waterCrystalBloom {
+  0% {
+    transform: scale(0.15) translateY(20px);
+    opacity: 0;
+    filter: blur(12px) brightness(1.8);
+  }
+  60% {
+    transform: scale(1.1) translateY(-5px);
+    opacity: 1;
+    filter: blur(0px) brightness(1.2);
+  }
+  85% {
+    transform: scale(0.96) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes waterFloatGentle {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 12px 20px rgba(7, 139, 229, 0.35));
+  }
+  50% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 20px 28px rgba(7, 139, 229, 0.5));
+  }
+}
+
+/* =========================================================
+   🔘 Tugmalar va Interaktiv Elementlar (/opt/lampp/htdocs/waterai uslubi)
+   ========================================================= */
+.btn-water-primary {
+  background: #078be5;
+  color: white;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(7, 139, 229, 0.35);
+}
+
+.btn-water-primary:hover {
+  background: #0574c1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(7, 139, 229, 0.45);
+}
+
+.btn-water-green {
+  background: #18a65c;
+  color: white;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(24, 166, 92, 0.35);
+}
+
+.btn-water-green:hover {
+  background: #11894a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(24, 166, 92, 0.45);
+}
+
+/* Pulse Glow */
+.pulse-glow {
+  animation: pulseGlow 2.5s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(7, 139, 229, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(7, 139, 229, 0);
+  }
+}
+
+/* =========================================================
+   Inputs & Range Sliders
+   ========================================================= */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 6px;
+  background: #d5e2ed;
+  outline: none;
+  cursor: pointer;
+  accent-color: #078be5;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #078be5;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(7, 139, 229, 0.5);
+  border: 2px solid #ffffff;
+  transition: transform 0.15s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Keng Responsive Konteyner */
+.wide-container {
+  width: 100%;
+  max-width: 1720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .wide-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wide-container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
