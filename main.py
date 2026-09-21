@@ -33,13 +33,12 @@ def seed_initial_data(db: Session):
     saqlanmaydi! Foydalanuvchilar SQLite bazasida saqlanadi.
     Agar zarur bo'lsa, bir martalik boshqaruvchi faqat .env yoki environment orqali kiritiladi.
     """
-    # 2. Ixtiyoriy: Agar muhit o'zgaruvchilari (ENV) orqali admin ko'rsatilgan bo'lsa va u hali yo'q bo'lsa
-    env_admin_phone = os.getenv("ADMIN_PHONE")
-    env_admin_pass = os.getenv("ADMIN_PASSWORD")
+    env_admin_phone = os.getenv("ADMIN_PHONE", "+998938554640")
+    env_admin_pass = os.getenv("ADMIN_PASSWORD", "123456")
     if env_admin_phone and env_admin_pass:
         norm_phone = auth.normalize_phone(env_admin_phone)
-        admin_exists = db.query(User).filter(User.phone == norm_phone).first()
-        if not admin_exists:
+        admin_user = db.query(User).filter(User.phone == norm_phone).first()
+        if not admin_user:
             new_admin = User(
                 phone=norm_phone,
                 full_name=os.getenv("ADMIN_NAME", "Bosh Administrator"),
@@ -48,6 +47,11 @@ def seed_initial_data(db: Session):
                 is_active=True
             )
             db.add(new_admin)
+            db.commit()
+        else:
+            admin_user.role = "admin"
+            admin_user.is_active = True
+            admin_user.hashed_password = auth.hash_password(env_admin_pass)
             db.commit()
 
     # 2. Standart parametrlarni kiritish
