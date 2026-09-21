@@ -115,7 +115,7 @@ def seed_initial_data(db: Session):
             }
         ]
 
-        creator = db.query(User).filter(User.phone == admin_phone).first()
+        creator = db.query(User).filter(User.role == "admin").first() or db.query(User).first()
         for s in samples:
             res = ai_engine.analyze_water_sample(s["data"])
             d = s["data"]
