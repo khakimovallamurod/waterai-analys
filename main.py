@@ -33,8 +33,8 @@ def seed_initial_data(db: Session):
     saqlanmaydi! Foydalanuvchilar SQLite bazasida saqlanadi.
     Agar zarur bo'lsa, bir martalik boshqaruvchi faqat .env yoki environment orqali kiritiladi.
     """
-    env_admin_phone = os.getenv("ADMIN_PHONE", "+998938554640")
-    env_admin_pass = os.getenv("ADMIN_PASSWORD", "123456")
+    env_admin_phone = os.getenv("ADMIN_PHONE")
+    env_admin_pass = os.getenv("ADMIN_PASSWORD")
     if env_admin_phone and env_admin_pass:
         norm_phone = auth.normalize_phone(env_admin_phone)
         admin_user = db.query(User).filter(User.phone == norm_phone).first()
