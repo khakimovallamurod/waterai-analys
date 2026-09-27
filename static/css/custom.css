@@ -392,3 +392,84 @@ input[type=range]::-webkit-slider-thumb:hover {
     padding-right: 3rem;
   }
 }
+
+/* =========================================================
+   Hero Background Slider & Leaflet Enhancements
+   ========================================================= */
+.hero-slide {
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hero-slide-img {
+  object-position: center 18% !important;
+  transform-origin: center top !important;
+}
+.hero-slide.active .hero-slide-img {
+  animation: kenBurnsZoom 10s ease-out forwards;
+}
+@keyframes kenBurnsZoom {
+  0% {
+    transform: scale(1.0);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+.custom-water-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.water-marker-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  animation: mapMarkerPulse 2.4s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+  pointer-events: none;
+}
+@keyframes mapMarkerPulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.water-marker-core {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.custom-water-marker:hover .water-marker-core {
+  transform: scale(1.22);
+}
+.leaflet-tile-pane {
+  filter: saturate(1.22) contrast(1.04) brightness(0.99);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem !important;
+  box-shadow: 0 14px 30px -5px rgba(18, 60, 112, 0.2) !important;
+  border: 1px solid #e0edf7 !important;
+  padding: 4px !important;
+}
+.custom-map-tooltip {
+  background: rgba(18, 60, 112, 0.94) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  padding: 4px 10px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
+}
+.custom-map-tooltip::before {
+  border-top-color: rgba(18, 60, 112, 0.94) !important;
+}
+
+

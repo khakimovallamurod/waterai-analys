@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full bg-[#f4f7f6]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Dashboard — WaterAI Tizimi{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/static/images/logo.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sidebar: {
+              DEFAULT: '#0d4d2b',
+              dark: '#09361e',
+              hover: '#135c35',
+              active: '#176d3e',
+              border: '#155d36'
+            },
+            adminbtn: {
+              excel: '#0fa958',
+              pdf: '#e02424',
+              print: '#0284c7'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* Custom Scrollbar for Admin */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      color: #d1fae5;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .sidebar-link:hover {
+      background-color: #135c35;
+      color: #ffffff;
+    }
+    .sidebar-link.active {
+      background-color: #176d3e;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+      }
+      .admin-content-area {
+        padding: 0 !important;
+      }
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full flex overflow-hidden text-[#1e293b] antialiased">
+
+  <!-- =========================================================================
+       1. CHAP TOMONDAGI TO'Q YASHIL SIDEBAR (2-RASM STYLEDA)
+       ========================================================================= -->
+  <aside class="w-64 flex-shrink-0 bg-sidebar flex flex-col justify-between border-r border-sidebar-border select-none no-print">
+    
+    <!-- Top Branding & Navigation -->
+    <div class="p-4 space-y-6">
+      
+      <!-- Brand Logo & Title -->
+      <a href="/admin" class="flex items-center gap-3 px-2 py-2 rounded-xl bg-sidebar-dark/40 border border-white/10 hover:bg-sidebar-dark/60 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <img src="/static/images/logo.png" alt="WaterAI Logo" class="w-full h-full object-contain">
+        </div>
+        <div class="overflow-hidden">
+          <div class="text-sm font-black text-white tracking-wide truncate">
+            WaterAI System
+          </div>
+          <div class="text-[10px] text-emerald-200/80 font-semibold truncate">
+            Laboratoriya Boshqaruvi
+          </div>
+        </div>
+      </a>
+
+      <!-- Navigation Menu (Har bir menyu alohida faylga ulanadi) -->
+      <nav class="space-y-1">
+        
+        <a href="/admin" class="sidebar-link {% if admin_active == 'dashboard' %}active{% endif %}">
+          <i class="fa-solid fa-chart-line w-4 text-emerald-300"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/admin/analyses" class="sidebar-link {% if admin_active == 'analyses' %}active{% endif %}">
+          <i class="fa-solid fa-flask-vial w-4 text-emerald-300"></i>
+          <span>Tahlillar ro'yxati</span>
+        </a>
+
+        <a href="/admin/analyses/new" class="sidebar-link {% if admin_active == 'new_analysis' %}active{% endif %}">
+          <i class="fa-solid fa-plus-circle w-4 text-emerald-300"></i>
+          <span>Yangi tahlil kiritish</span>
+        </a>
+
+        <a href="/admin/users" class="sidebar-link {% if admin_active == 'users' %}active{% endif %}">
+          <i class="fa-solid fa-users w-4 text-emerald-300"></i>
+          <span>Foydalanuvchilar</span>
+        </a>
+
+        <a href="/admin/sources" class="sidebar-link {% if admin_active == 'sources' %}active{% endif %}">
+          <i class="fa-solid fa-map-location-dot w-4 text-emerald-300"></i>
+          <span>Suv manbalari</span>
+        </a>
+
+        <a href="/admin/norms" class="sidebar-link {% if admin_active == 'norms' %}active{% endif %}">
+          <i class="fa-solid fa-scale-balanced w-4 text-emerald-300"></i>
+          <span>SanPiN me'yorlari</span>
+        </a>
+
+        <div class="pt-4 border-t border-sidebar-border/60">
+          <a href="/" class="sidebar-link text-emerald-200 hover:text-white">
+            <i class="fa-solid fa-house w-4 text-emerald-300"></i>
+            <span>Bosh sahifaga qaytish</span>
+          </a>
+        </div>
+
+      </nav>
+
+    </div>
+
+    <!-- Bottom Admin Profile Info -->
+    <div class="p-3 bg-sidebar-dark/50 border-t border-sidebar-border flex items-center justify-between">
+      <div class="flex items-center gap-2.5 overflow-hidden">
+        <div class="w-8 h-8 rounded-lg bg-emerald-700 text-white font-black text-xs flex items-center justify-center flex-shrink-0 shadow-inner">
+          AD
+        </div>
+        <div class="overflow-hidden">
+          <div class="text-xs font-bold text-white truncate">
+            {{ current_user.full_name if current_user else 'Admin' }}
+          </div>
+          <div class="text-[10px] text-emerald-300 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Boshqaruvchi</span>
+          </div>
+        </div>
+      </div>
+      <a href="/logout" title="Chiqish" class="p-1.5 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-800 transition-colors">
+        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- =========================================================================
+       2. O'NG TOMONDAGI ASOSIY PANEL (MAIN CONTENT AREA)
+       ========================================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm no-print">
+      <div class="flex items-center gap-2 text-sm font-bold text-slate-800">
+        <span class="text-emerald-700 text-base">💧</span>
+        <span>{% block header_title %}Suv tahlillari va laboratoriya monitoringi{% endblock %}</span>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Flash Alerts -->
+    {% if alert_message %}
+    <div class="m-6 mb-0 p-4 rounded-xl text-sm font-semibold flex items-center justify-between no-print {% if alert_type == 'error' %}bg-rose-50 text-rose-800 border border-rose-200{% else %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid {% if alert_type == 'error' %}fa-circle-exclamation text-rose-600{% else %}fa-circle-check text-emerald-600{% endif %}"></i>
+        <span>{{ alert_message }}</span>
+      </div>
+      <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    {% endif %}
+
+    <!-- Asosiy Kontent Maydoni -->
+    <main class="p-6 space-y-6 flex-1 admin-content-area">
+      {% block admin_content %}{% endblock %}
+    </main>
+
+  </div>
+
+  {% block admin_scripts %}{% endblock %}
+
+</body>
+</html>

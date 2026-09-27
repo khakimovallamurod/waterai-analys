@@ -68,3 +68,27 @@ class ParameterNorm(Base):
     max_val = Column(Float, nullable=True)
     importance_pct = Column(Float, default=10.0)
     description = Column(String(255), nullable=True)
+
+
+class WaterSource(Base):
+    __tablename__ = "water_sources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    region = Column(String(100), nullable=False)
+    city = Column(String(100), default="Samarqand", nullable=True)
+    source_type = Column(String(50), default="Daryo suvi", nullable=False)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
+    status = Column(String(20), default="valid", nullable=False)  # "valid", "conditional", "invalid"
+    status_label = Column(String(50), default="🟢 Yaroqli (Toza)", nullable=False)
+    quality_score = Column(Float, default=90.0, nullable=False)
+    ph = Column(Float, default=7.2, nullable=False)
+    tds = Column(Float, default=250.0, nullable=False)
+    turbidity = Column(Float, default=1.0, nullable=False)
+    hardness = Column(Float, default=140.0, nullable=True)
+    samples_count = Column(Integer, default=1, nullable=False)
+    last_tested = Column(String(50), default="2026-09-27", nullable=True)
+    desc = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+

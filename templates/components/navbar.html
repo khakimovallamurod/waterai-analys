@@ -11,36 +11,56 @@
           <span class="text-xl font-black tracking-tight text-[#123c70]">
             Suv<span class="text-[#078be5]">AI</span>
           </span>
-          <span class="text-[10px] block font-bold text-[#61748a] tracking-wider uppercase -mt-1">
-            SamDU Sun'iy Intellekt Lab
+          <span class="text-[9px] block font-bold text-[#61748a] tracking-wider uppercase -mt-1">
+            SamDU Sun'iy Intellekt va RT Instituti
           </span>
         </div>
       </a>
 
-      <!-- Desktop Navigation Links (Sections: Bosh sahifa, About, Contact + Tools) -->
-      <div class="hidden md:flex items-center space-x-1 lg:space-x-3">
-        <a href="/#home" class="px-3 py-2 rounded-xl text-sm font-semibold {% if active_page == 'home' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-house text-xs"></i>
+      <!-- Desktop Navigation Links (Sections: Bosh sahifa, Xarita, Video, Tahlillar, Biz haqimizda, Jamoa, Bog'lanish) -->
+      <div class="hidden lg:flex items-center space-x-1">
+        <a href="/#home" class="px-2.5 py-1.5 rounded-xl text-xs font-bold {% if active_page == 'home' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-house text-[11px]"></i>
           Bosh sahifa
         </a>
 
-        <a href="/#about" class="px-3 py-2 rounded-xl text-sm font-semibold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-circle-info text-xs"></i>
+        <a href="/#map-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-map-location-dot text-[11px] text-[#078be5]"></i>
+          Xarita
+        </a>
+
+        <a href="/#video-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-circle-play text-[11px] text-rose-500"></i>
+          Video
+        </a>
+
+        <a href="/#analyses-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-flask text-[11px] text-[#18a65c]"></i>
+          Tahlillar
+        </a>
+
+        <a href="/#about" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-circle-info text-[11px]"></i>
           Biz haqimizda
         </a>
 
-        <a href="/#contact" class="px-3 py-2 rounded-xl text-sm font-semibold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-address-book text-xs"></i>
+        <a href="/#team" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-users text-[11px] text-indigo-500"></i>
+          Jamoamiz
+        </a>
+
+        <a href="/#contact" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-address-book text-[11px]"></i>
           Bog‘lanish
         </a>
 
-        <a href="/analyze" class="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-md shadow-emerald-200 transition-all flex items-center gap-2 transform active:scale-95">
-          <i class="fa-solid fa-flask-vial text-sm"></i>
+        <a href="/analyze" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-sm transition-all flex items-center gap-1.5 ml-1">
+          <i class="fa-solid fa-flask-vial text-xs"></i>
           Yangi Tahlil
         </a>
 
-        <a href="/stats" class="px-3 py-2 rounded-xl text-sm font-semibold {% if active_page == 'stats' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-chart-pie text-xs"></i>
+        <a href="/stats" class="px-2.5 py-1.5 rounded-xl text-xs font-bold {% if active_page == 'stats' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-chart-pie text-[11px]"></i>
           Statistika
         </a>
 

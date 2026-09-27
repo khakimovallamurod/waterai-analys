@@ -19,7 +19,8 @@ from sqlalchemy.orm import Session
 import ai_engine
 import auth
 from database import engine, Base, get_db
-from models import User, WaterAnalysis, ParameterNorm
+from models import User, WaterAnalysis, ParameterNorm, WaterSource
+from water_sources import get_water_sources
 
 
 # ==============================================================================
@@ -153,6 +154,30 @@ def seed_initial_data(db: Session):
             db.add(analysis)
         db.commit()
 
+    # 4. Suv manbalari jadvalini dastlabki ma'lumotlar bilan to'ldirish
+    if db.query(WaterSource).count() == 0:
+        for src in get_water_sources():
+            ws = WaterSource(
+                name=src["name"],
+                region=src["region"],
+                city=src.get("city", "Samarqand"),
+                source_type=src["source_type"],
+                lat=src["lat"],
+                lng=src["lng"],
+                status=src["status"],
+                status_label=src["status_label"],
+                quality_score=src["quality_score"],
+                ph=src["ph"],
+                tds=src["tds"],
+                turbidity=src["turbidity"],
+                hardness=src.get("hardness", 140.0),
+                samples_count=src.get("samples_count", 1),
+                last_tested=src.get("last_tested", "2026-09-27"),
+                desc=src.get("desc", "")
+            )
+            db.add(ws)
+        db.commit()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -221,13 +246,53 @@ def index(request: Request, db: Session = Depends(get_db)):
     conditional_count = sum(1 for a in analyses if a.status == "conditional")
     invalid_count = sum(1 for a in analyses if a.status == "invalid")
 
+    # Slayder uchun rasmlar ro'yxatini static/images/homepage ichidan dinamik o'qish
+    homepage_dir = os.path.join("static", "images", "homepage")
+    slider_images = []
+    if os.path.exists(homepage_dir):
+        for fname in sorted(os.listdir(homepage_dir)):
+            if fname.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                slider_images.append(f"/static/images/homepage/{fname}")
+    if not slider_images:
+        slider_images = ["/static/images/homepage/1.jpeg"]
+
+    # O'zbekiston xaritasi uchun tadqiqot suv manbalari (SQLite bazasidan dinamik o'qish)
+    db_sources = db.query(WaterSource).order_by(WaterSource.id.asc()).all()
+    water_sources = [
+        {
+            "id": s.id,
+            "name": s.name,
+            "region": s.region,
+            "city": s.city,
+            "source_type": s.source_type,
+            "lat": s.lat,
+            "lng": s.lng,
+            "status": s.status,
+            "status_label": s.status_label,
+            "quality_score": s.quality_score,
+            "ph": s.ph,
+            "tds": s.tds,
+            "turbidity": s.turbidity,
+            "hardness": s.hardness or 140.0,
+            "samples_count": s.samples_count,
+            "last_tested": s.last_tested,
+            "desc": s.desc or ""
+        }
+        for s in db_sources
+    ]
+    unique_regions = len(set(s.get("region") for s in water_sources))
+
     ctx = get_base_context(request, active_page="home", current_user=current_user)
     ctx.update({
         "analyses": analyses,
         "total_count": total_count,
         "valid_count": valid_count,
         "conditional_count": conditional_count,
-        "invalid_count": invalid_count
+        "invalid_count": invalid_count,
+        "slider_images": slider_images,
+        "water_sources": water_sources,
+        "total_sources_count": len(water_sources),
+        "unique_regions_count": unique_regions
     })
     return templates.TemplateResponse(request=request, name="user/dashboard.html", context=ctx)
 
@@ -568,7 +633,8 @@ def change_password(
 def login_page(request: Request, db: Session = Depends(get_db)):
     current_user = auth.get_current_user_optional(request, db)
     if current_user:
-        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        target_url = "/admin" if current_user.role == "admin" else "/"
+        return RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
 
     ctx = get_base_context(request, active_page="login")
     return templates.TemplateResponse(request=request, name="auth/login.html", context=ctx)
@@ -596,7 +662,8 @@ def handle_login(
         return templates.TemplateResponse(request=request, name="auth/login.html", context=ctx)
 
     token = auth.create_access_token(data={"sub": user.phone})
-    response = RedirectResponse(url="/?msg=Tizimga+xush+kelibsiz!&type=success", status_code=status.HTTP_303_SEE_OTHER)
+    target_url = "/admin?msg=Tizimga+xush+kelibsiz!&type=success" if user.role == "admin" else "/?msg=Tizimga+xush+kelibsiz!&type=success"
+    response = RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(
         key="access_token",
         value=f"Bearer {token}",
@@ -681,7 +748,7 @@ def logout():
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel(request: Request, db: Session = Depends(get_db)):
-    """Admin boshqaruv paneli"""
+    """Admin boshqaruv paneli (Dashboard)"""
     current_user = auth.get_current_user_optional(request, db)
     if not current_user or current_user.role != "admin":
         return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
@@ -690,16 +757,311 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     analyses = db.query(WaterAnalysis).order_by(WaterAnalysis.created_at.desc()).all()
 
     valid_count = sum(1 for a in analyses if a.status == "valid")
+    conditional_count = sum(1 for a in analyses if a.status == "conditional")
     invalid_count = sum(1 for a in analyses if a.status == "invalid")
+    total_count = len(analyses)
+    avg_wqi = (sum(a.quality_score for a in analyses) / total_count) if total_count > 0 else 0.0
+
+    norms = db.query(ParameterNorm).all()
+    water_sources = db.query(WaterSource).order_by(WaterSource.id.asc()).all()
 
     ctx = get_base_context(request, active_page="admin", current_user=current_user)
     ctx.update({
+        "admin_active": "dashboard",
         "users": users,
         "analyses": analyses,
+        "total_count": total_count,
         "valid_count": valid_count,
-        "invalid_count": invalid_count
+        "conditional_count": conditional_count,
+        "invalid_count": invalid_count,
+        "avg_wqi": avg_wqi,
+        "norms": norms,
+        "water_sources": water_sources
     })
     return templates.TemplateResponse(request=request, name="admin/dashboard.html", context=ctx)
+
+
+@app.get("/admin/analyses", response_class=HTMLResponse)
+def admin_analyses_page(request: Request, db: Session = Depends(get_db)):
+    """Admin: Tahlillar ro'yxati sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    analyses = db.query(WaterAnalysis).order_by(WaterAnalysis.created_at.desc()).all()
+    valid_count = sum(1 for a in analyses if a.status == "valid")
+    conditional_count = sum(1 for a in analyses if a.status == "conditional")
+    invalid_count = sum(1 for a in analyses if a.status == "invalid")
+    total_count = len(analyses)
+    avg_wqi = (sum(a.quality_score for a in analyses) / total_count) if total_count > 0 else 0.0
+
+    ctx = get_base_context(request, active_page="admin", current_user=current_user)
+    ctx.update({
+        "admin_active": "analyses",
+        "analyses": analyses,
+        "total_count": total_count,
+        "valid_count": valid_count,
+        "conditional_count": conditional_count,
+        "invalid_count": invalid_count,
+        "avg_wqi": avg_wqi
+    })
+    return templates.TemplateResponse(request=request, name="admin/analyses.html", context=ctx)
+
+
+@app.get("/admin/analyses/new", response_class=HTMLResponse)
+def admin_new_analysis_page(request: Request, db: Session = Depends(get_db)):
+    """Admin: Yangi tahlil kiritish sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    norms = db.query(ParameterNorm).all()
+    ctx = get_base_context(request, active_page="admin", current_user=current_user)
+    ctx.update({
+        "admin_active": "new_analysis",
+        "norms": norms
+    })
+    return templates.TemplateResponse(request=request, name="admin/new_analysis.html", context=ctx)
+
+
+@app.get("/admin/users", response_class=HTMLResponse)
+def admin_users_page(request: Request, db: Session = Depends(get_db)):
+    """Admin: Foydalanuvchilar boshqaruvi sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    ctx = get_base_context(request, active_page="admin", current_user=current_user)
+    ctx.update({
+        "admin_active": "users",
+        "users": users
+    })
+    return templates.TemplateResponse(request=request, name="admin/users.html", context=ctx)
+
+
+@app.get("/admin/sources", response_class=HTMLResponse)
+def admin_sources_page(request: Request, db: Session = Depends(get_db)):
+    """Admin: Suv manbalari boshqaruvi sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    water_sources = db.query(WaterSource).order_by(WaterSource.id.asc()).all()
+    ctx = get_base_context(request, active_page="admin", current_user=current_user)
+    ctx.update({
+        "admin_active": "sources",
+        "water_sources": water_sources
+    })
+    return templates.TemplateResponse(request=request, name="admin/sources.html", context=ctx)
+
+
+@app.get("/admin/norms", response_class=HTMLResponse)
+def admin_norms_page(request: Request, db: Session = Depends(get_db)):
+    """Admin: SanPiN me'yorlari sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/?msg=Ushbu+sahifaga+faqat+adminlar+kira+oladi&type=error", status_code=status.HTTP_303_SEE_OTHER)
+
+    norms = db.query(ParameterNorm).all()
+    ctx = get_base_context(request, active_page="admin", current_user=current_user)
+    ctx.update({
+        "admin_active": "norms",
+        "norms": norms
+    })
+    return templates.TemplateResponse(request=request, name="admin/norms.html", context=ctx)
+
+
+@app.post("/admin/source/create")
+def admin_create_water_source(
+    request: Request,
+    name: str = Form(...),
+    region: str = Form(...),
+    city: Optional[str] = Form("Samarqand"),
+    source_type: str = Form("Daryo suvi"),
+    lat: float = Form(...),
+    lng: float = Form(...),
+    status: str = Form("valid"),
+    quality_score: float = Form(90.0),
+    ph: float = Form(7.2),
+    tds: float = Form(250.0),
+    turbidity: float = Form(1.0),
+    hardness: float = Form(140.0),
+    samples_count: int = Form(1),
+    desc: Optional[str] = Form(""),
+    db: Session = Depends(get_db)
+):
+    """Admin yangi tadqiqot suv manbasini qo'shishi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/", status_code=303)
+
+    status_labels = {
+        "valid": "🟢 Yaroqli (Toza)",
+        "conditional": "🟡 Shartli yaroqli",
+        "invalid": "🔴 Yaroqsiz"
+    }
+
+    new_src = WaterSource(
+        name=name.strip(),
+        region=region.strip(),
+        city=city.strip() if city else "Samarqand",
+        source_type=source_type,
+        lat=lat,
+        lng=lng,
+        status=status,
+        status_label=status_labels.get(status, "🟢 Yaroqli (Toza)"),
+        quality_score=quality_score,
+        ph=ph,
+        tds=tds,
+        turbidity=turbidity,
+        hardness=hardness,
+        samples_count=samples_count,
+        last_tested=datetime.utcnow().strftime("%Y-%m-%d"),
+        desc=desc.strip() if desc else ""
+    )
+    db.add(new_src)
+    db.commit()
+
+    return RedirectResponse(url="/admin/sources?msg=Yangi+suv+manbasi+muvaffaqiyatli+qo'shildi&type=success", status_code=303)
+
+
+@app.post("/admin/source/edit/{source_id}")
+def admin_edit_water_source(
+    request: Request,
+    source_id: int,
+    name: str = Form(...),
+    region: str = Form(...),
+    city: Optional[str] = Form("Samarqand"),
+    source_type: str = Form("Daryo suvi"),
+    lat: float = Form(...),
+    lng: float = Form(...),
+    status: str = Form("valid"),
+    quality_score: float = Form(90.0),
+    ph: float = Form(7.2),
+    tds: float = Form(250.0),
+    turbidity: float = Form(1.0),
+    hardness: float = Form(140.0),
+    samples_count: int = Form(1),
+    desc: Optional[str] = Form(""),
+    db: Session = Depends(get_db)
+):
+    """Admin mavjud suv manbasini tahrirlashi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/", status_code=303)
+
+    src = db.query(WaterSource).filter(WaterSource.id == source_id).first()
+    if src:
+        status_labels = {
+            "valid": "🟢 Yaroqli (Toza)",
+            "conditional": "🟡 Shartli yaroqli",
+            "invalid": "🔴 Yaroqsiz"
+        }
+        src.name = name.strip()
+        src.region = region.strip()
+        src.city = city.strip() if city else "Samarqand"
+        src.source_type = source_type
+        src.lat = lat
+        src.lng = lng
+        src.status = status
+        src.status_label = status_labels.get(status, "🟢 Yaroqli (Toza)")
+        src.quality_score = quality_score
+        src.ph = ph
+        src.tds = tds
+        src.turbidity = turbidity
+        src.hardness = hardness
+        src.samples_count = samples_count
+        src.desc = desc.strip() if desc else ""
+        src.last_tested = datetime.utcnow().strftime("%Y-%m-%d")
+        db.commit()
+
+    return RedirectResponse(url="/admin/sources?msg=Suv+manbasi+muvaffaqiyatli+yangilandi&type=success", status_code=303)
+
+
+@app.post("/admin/source/delete/{source_id}")
+def admin_delete_water_source(
+    request: Request,
+    source_id: int,
+    db: Session = Depends(get_db)
+):
+    """Admin suv manbasini o'chirishi"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/", status_code=303)
+
+    src = db.query(WaterSource).filter(WaterSource.id == source_id).first()
+    if src:
+        db.delete(src)
+        db.commit()
+
+    return RedirectResponse(url="/admin/sources?msg=Suv+manbasi+muvaffaqiyatli+o'chirildi&type=success", status_code=303)
+
+
+@app.post("/admin/analyze")
+def admin_create_analysis(
+    request: Request,
+    sample_name: str = Form("Suv namunasi"),
+    source_type: str = Form("Vodoprovod suvi"),
+    location: Optional[str] = Form("Samarqand"),
+    temperature: float = Form(20.0),
+    ph: float = Form(7.0),
+    tds: float = Form(250.0),
+    turbidity: float = Form(1.0),
+    ec: float = Form(300.0),
+    hardness: float = Form(150.0),
+    sulfate: float = Form(100.0),
+    chloramines: float = Form(2.0),
+    organic: float = Form(2.0),
+    trihalomethanes: float = Form(10.0),
+    extra_param: Optional[str] = Form("Tanlang"),
+    db: Session = Depends(get_db)
+):
+    """Admin paneli orqali bevosita tahlil kiritish"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return RedirectResponse(url="/", status_code=303)
+
+    input_data = {
+        "ph": ph, "tds": tds, "turbidity": turbidity, "hardness": hardness,
+        "sulfate": sulfate, "chloramines": chloramines, "organic": organic,
+        "trihalomethanes": trihalomethanes, "temperature": temperature,
+        "ec": ec, "source_type": source_type
+    }
+
+    results = ai_engine.analyze_water_sample(input_data)
+
+    analysis = WaterAnalysis(
+        user_id=current_user.id,
+        sample_name=sample_name,
+        source_type=source_type,
+        location=location or "Samarqand",
+        temperature=temperature,
+        ph=ph,
+        tds=tds,
+        turbidity=turbidity,
+        ec=ec,
+        hardness=hardness,
+        sulfate=sulfate,
+        chloramines=chloramines,
+        organic=organic,
+        trihalomethanes=trihalomethanes,
+        extra_param=extra_param,
+        status=results["status"],
+        status_label=results["status_label"],
+        quality_score=results["wqi"],
+        confidence=results["confidence"],
+        prob_valid=results["probabilities"]["valid"],
+        prob_conditional=results["probabilities"]["conditional"],
+        prob_invalid=results["probabilities"]["invalid"],
+        bad_parameters_count=results["bad_parameters_count"],
+        status_text=results["status_text"],
+        ai_recommendation=results["recommendation"]
+    )
+    db.add(analysis)
+    db.commit()
+
+    return RedirectResponse(url="/admin/analyses?msg=Yangi+suv+tahlili+muvaffaqiyatli+qo'shildi&type=success", status_code=303)
 
 
 @app.post("/admin/analysis/delete/{analysis_id}")
@@ -707,14 +1069,14 @@ def delete_analysis(request: Request, analysis_id: int, db: Session = Depends(ge
     """Tahlilni o'chirish"""
     current_user = auth.get_current_user_optional(request, db)
     if not current_user or current_user.role != "admin":
-        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/", status_code=303)
 
     analysis = db.query(WaterAnalysis).filter(WaterAnalysis.id == analysis_id).first()
     if analysis:
         db.delete(analysis)
         db.commit()
 
-    return RedirectResponse(url="/admin?msg=Tahlil+muvaffaqiyatli+o'chirildi&type=success", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/admin/analyses?msg=Tahlil+muvaffaqiyatli+o'chirildi&type=success", status_code=303)
 
 
 @app.post("/admin/user/toggle-role/{user_id}")
@@ -722,14 +1084,14 @@ def toggle_user_role(request: Request, user_id: int, db: Session = Depends(get_d
     """Foydalanuvchi rolini o'zgartirish (admin <-> user)"""
     current_user = auth.get_current_user_optional(request, db)
     if not current_user or current_user.role != "admin":
-        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/", status_code=303)
 
     target_user = db.query(User).filter(User.id == user_id).first()
     if target_user and target_user.id != current_user.id:
         target_user.role = "user" if target_user.role == "admin" else "admin"
         db.commit()
 
-    return RedirectResponse(url="/admin?msg=Foydalanuvchi+roli+o'zgartirildi&type=success", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/admin/users?msg=Foydalanuvchi+roli+o'zgartirildi&type=success", status_code=303)
 
 
 # ==============================================================================
@@ -871,4 +1233,4 @@ def api_get_norms(db: Session = Depends(get_db)):
 # ==============================================================================
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)

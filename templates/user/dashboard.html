@@ -3,127 +3,144 @@
 {% block title %}Suv sifatini aniqlash — AI tizimi | WaterAI Analysis{% endblock %}
 
 {% block content %}
-<div class="space-y-16 w-full">
+<div class="space-y-20 w-full">
   
   <!-- =========================================================================
-       SECTION 1: BOSH SAHIFA & HERO (/opt/lampp/htdocs/waterai uslubida)
+       SECTION 1: BOSH SAHIFA & HERO (ORQA FONDA SLAYDER BILAN)
+       Mijoz talabi: Bino tepasi va peshtoqi aniq chiqishi uchun object-position sozlandi!
        ========================================================================= -->
-  <section id="home" class="relative header-wave-bg pt-12 pb-24 border-b border-[#e0edf7]">
-    <div class="wide-container text-center relative z-10">
+  <section id="home" class="relative overflow-hidden pt-16 pb-28 min-h-[600px] flex items-center justify-center border-b border-[#d5e2ed]">
+    
+    <!-- 🖼️ Background Carousel / Slider -->
+    <div id="hero-slider" class="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+      {% for img_url in slider_images %}
+      <div class="hero-slide absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out {% if loop.first %}opacity-100 active{% else %}opacity-0{% endif %}" data-index="{{ loop.index0 }}">
+        <img src="{{ img_url }}" alt="WaterAI Slide {{ loop.index }}" class="w-full h-full object-cover object-[center_18%] transform transition-transform duration-7000 ease-out hero-slide-img" style="object-position: center 18% !important;">
+      </div>
+      {% endfor %}
+      <!-- Tabiiy va tiniq orqa fon qoplami (og'ir ko'k rang olib tashlandi, rasm o'zining tabiiy rangida tiniq ko'rinadi) -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/25 to-black/65"></div>
+    </div>
+
+    <!-- Slayder boshqaruv nuqtalari (Dots) & Arrow tugmalari -->
+    <div class="absolute bottom-6 right-6 z-20 flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/30 text-white">
+      <button id="slider-prev" type="button" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors text-xs" title="Oldingi rasm">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <div id="slider-dots" class="flex items-center gap-1.5 px-1">
+        {% for img_url in slider_images %}
+        <button type="button" class="slider-dot w-2 h-2 rounded-full transition-all {% if loop.first %}bg-white w-5{% else %}bg-white/50 hover:bg-white/80{% endif %}" data-index="{{ loop.index0 }}" aria-label="Slide {{ loop.index }}"></button>
+        {% endfor %}
+      </div>
+      <button id="slider-next" type="button" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors text-xs" title="Keyingi rasm">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="wide-container text-center relative z-10 px-4 sm:px-6">
       
-      <!-- Clean Centered Logo (as in /opt/lampp/htdocs/waterai) -->
-      <div class="flex justify-center items-center mb-4">
-        <img src="/static/images/logo.png" alt="SuvAI Logo" class="w-20 h-20 sm:w-24 sm:h-24 object-contain filter drop-shadow hover:scale-105 transition-transform duration-300">
+      <!-- Logo -->
+      <div class="flex justify-center items-center mb-5">
+        <div class="p-2 rounded-2xl bg-white/95 backdrop-blur-md shadow-2xl border border-white/60 hover:scale-105 transition-transform duration-300">
+          <img src="/static/images/logo.png" alt="SuvAI Logo" class="w-16 h-16 sm:w-20 sm:h-20 object-contain">
+        </div>
       </div>
 
-      <!-- Badge (cleanly spaced below logo) -->
+      <!-- Institute Badge -->
       <div class="mb-5">
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-[#d5e2ed] text-xs font-bold text-[#183e70] uppercase tracking-wider shadow-sm">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-white/50 text-xs font-bold text-[#123c70] uppercase tracking-wider shadow-lg">
           <span class="w-2 h-2 rounded-full bg-[#18a65c] animate-pulse"></span>
-          SamDU “Sun’iy intellekt laboratoriyasi” • SanPiN 0211-06
+          Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti
         </span>
       </div>
 
-      <!-- Main Title (as in /opt/lampp/htdocs/waterai/components/header.php) -->
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-[#123c70] tracking-tight max-w-4xl mx-auto leading-tight">
-        Suv sifatini aniqlashning <span class="text-[#078be5]">sun’iy intellekt</span> tizimi
+      <!-- Main Title (To'g'ri va mutanosib yozilgan, satrlari bir-birini bosib qolmaydi) -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight max-w-4xl mx-auto leading-[1.2] drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+        Suv sifatini aniqlashning <br class="hidden sm:inline">
+        <span class="text-[#38bdf8] whitespace-nowrap">sun’iy intellekt</span> tizimi
       </h1>
 
       <!-- Subtitle -->
-      <p class="mt-4 text-base sm:text-xl text-[#61748a] font-medium max-w-2xl mx-auto">
-        Toza suv – sog‘lom hayot!
+      <p class="mt-4 text-base sm:text-xl text-sky-100 font-medium max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+        Toza suv – sog‘lom hayot! Tabiiy va ichimlik suv manbalarining laboratoriya tahlillari hamda tezkor monitoringi
       </p>
 
       <!-- Action Buttons -->
       <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-        <a href="/analyze" class="px-8 py-4 rounded-2xl font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-xl shadow-emerald-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base pulse-glow">
+        <a href="/analyze" class="px-8 py-4 rounded-2xl font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-xl shadow-emerald-950/30 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base">
           <i class="fa-solid fa-flask-vial text-lg"></i>
           <span>Yangi Tahlil Qilish</span>
         </a>
 
-        <a href="/stats" class="px-8 py-4 rounded-2xl font-bold text-white bg-[#078be5] hover:bg-[#0574c1] shadow-xl shadow-sky-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base">
-          <i class="fa-solid fa-chart-simple text-lg"></i>
-          <span>📊 Statistika</span>
+        <a href="#map-section" class="px-7 py-4 rounded-2xl font-bold text-white bg-sky-600/90 hover:bg-sky-600 backdrop-blur-md border border-sky-400/40 shadow-xl shadow-sky-950/30 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2.5 text-base">
+          <i class="fa-solid fa-map-location-dot text-lg"></i>
+          <span>O‘zbekiston Xaritasi</span>
         </a>
 
-        <a href="/history" class="px-7 py-4 rounded-2xl font-bold text-[#183e70] bg-white hover:bg-[#f5fbff] border border-[#d5e2ed] shadow-md transition-all flex items-center gap-2 text-base">
-          <i class="fa-solid fa-clock-rotate-left text-sm text-[#078be5]"></i>
-          <span>Tahlillar tarixi</span>
+        <a href="#video-section" class="px-7 py-4 rounded-2xl font-bold text-[#123c70] bg-white hover:bg-sky-50 shadow-xl transition-all flex items-center gap-2 text-base">
+          <i class="fa-solid fa-circle-play text-base text-rose-600"></i>
+          <span>Video Taqdimot</span>
         </a>
       </div>
 
-    </div>
-
-    <!-- Bottom Wave Shape Curve -->
-    <div class="water-wave-curve">
-      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="#e9f0f7"></path>
-      </svg>
     </div>
   </section>
 
   <!-- =========================================================================
-       SUMMARY METRIC CARDS (WIDE RESPONSIVE GRID)
+       SUMMARY METRIC CARDS (BURCHAKDAGI ICONSIZ TOZA PROFSIONAL DIZAYN)
        ========================================================================= -->
-  <section class="wide-container -mt-8 relative z-20">
+  <section class="wide-container -mt-14 relative z-20">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       
-      <div class="glass-card p-6 bg-white border border-[#e0edf7] rounded-3xl shadow-lg shadow-sky-900/5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Jami tahlillar</span>
-          <div class="w-12 h-12 rounded-2xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-xl">
-            <i class="fa-solid fa-flask"></i>
-          </div>
+      <!-- Card 1: Jami tahlillar -->
+      <div class="p-6 bg-white border border-[#e0edf7] rounded-3xl shadow-xl shadow-sky-900/5 hover:border-sky-300 transition-all">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#61748a]">
+          Jami tahlillar
         </div>
-        <div class="mt-4 text-3xl sm:text-4xl font-black text-[#123c70]">
+        <div class="mt-3 text-3xl sm:text-4xl font-black text-[#123c70] tracking-tight">
           {{ total_count if total_count is defined else (analyses|length if analyses else 0) }}
         </div>
-        <div class="mt-1 text-xs text-[#647991]">
+        <div class="mt-1.5 text-xs text-[#647991]">
           Barcha tekshirilgan suv namunalari
         </div>
       </div>
 
-      <div class="glass-card p-6 bg-white border border-[#b9e8cf] rounded-3xl shadow-lg shadow-emerald-900/5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-[#11894a]">Yaroqli (Toza)</span>
-          <div class="w-12 h-12 rounded-2xl bg-[#eafaf2] text-[#18a65c] flex items-center justify-center text-xl">
-            <i class="fa-solid fa-circle-check"></i>
-          </div>
+      <!-- Card 2: Yaroqli (Toza) -->
+      <div class="p-6 bg-white border border-[#b9e8cf] rounded-3xl shadow-xl shadow-emerald-900/5 hover:border-emerald-400 transition-all">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#11894a]">
+          Yaroqli (Toza)
         </div>
-        <div class="mt-4 text-3xl sm:text-4xl font-black text-[#18a65c]">
+        <div class="mt-3 text-3xl sm:text-4xl font-black text-[#18a65c] tracking-tight">
           {{ valid_count if valid_count is defined else 0 }}
         </div>
-        <div class="mt-1 text-xs text-[#11894a]/80">
+        <div class="mt-1.5 text-xs text-[#11894a]/80">
           Iste’mol uchun to‘liq xavfsiz suvlar
         </div>
       </div>
 
-      <div class="glass-card p-6 bg-white border border-amber-200 rounded-3xl shadow-lg shadow-amber-900/5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Shartli yaroqli</span>
-          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
+      <!-- Card 3: Shartli yaroqli -->
+      <div class="p-6 bg-white border border-amber-200 rounded-3xl shadow-xl shadow-amber-900/5 hover:border-amber-400 transition-all">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+          Shartli yaroqli
         </div>
-        <div class="mt-4 text-3xl sm:text-4xl font-black text-amber-600">
+        <div class="mt-3 text-3xl sm:text-4xl font-black text-amber-600 tracking-tight">
           {{ conditional_count if conditional_count is defined else 0 }}
         </div>
-        <div class="mt-1 text-xs text-amber-700/80">
+        <div class="mt-1.5 text-xs text-amber-700/80">
           Filtrlash yoki qaynatish talab etiladi
         </div>
       </div>
 
-      <div class="glass-card p-6 bg-white border border-rose-200 rounded-3xl shadow-lg shadow-rose-900/5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Yaroqsiz</span>
-          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
-            <i class="fa-solid fa-ban"></i>
-          </div>
+      <!-- Card 4: Yaroqsiz -->
+      <div class="p-6 bg-white border border-rose-200 rounded-3xl shadow-xl shadow-rose-900/5 hover:border-rose-400 transition-all">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-rose-700">
+          Yaroqsiz
         </div>
-        <div class="mt-4 text-3xl sm:text-4xl font-black text-rose-600">
+        <div class="mt-3 text-3xl sm:text-4xl font-black text-rose-600 tracking-tight">
           {{ invalid_count if invalid_count is defined else 0 }}
         </div>
-        <div class="mt-1 text-xs text-rose-700/80">
+        <div class="mt-1.5 text-xs text-rose-700/80">
           Iste’mol uchun xavfli deb topilgan
         </div>
       </div>
@@ -132,10 +149,181 @@
   </section>
 
   <!-- =========================================================================
-       SECTION: SO'NGGI TAHLILLAR JURNALI
+       SECTION 2: O‘ZBEKISTON XARITASI (HAQIQIY VA ANIQ O'ZBEKISTON XARITASI)
+       Mijoz talabi: API kalit talab qilmaydigan haqiqiy OpenStreetMap + O'zbekiston chegaralari!
        ========================================================================= -->
-  <section class="wide-container">
-    <div class="glass-panel rounded-3xl p-6 sm:p-8 bg-white border border-[#e0edf7] shadow-sm">
+  <section id="map-section" class="wide-container scroll-mt-20">
+    <div class="rounded-3xl p-6 sm:p-8 bg-white border border-[#e0edf7] shadow-sm space-y-6">
+      
+      <!-- Sarlavha va Xulosa -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-[#078be5] text-xs font-bold uppercase tracking-wider mb-1">
+            <i class="fa-solid fa-map-location-dot"></i>
+            Respublika Bo‘yicha Monitoring
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-[#123c70] tracking-tight">
+            O‘zbekiston Suv Manbalari va Tadqiqot Xaritasi
+          </h2>
+          <p class="text-xs sm:text-sm text-[#61748a] mt-1 max-w-2xl">
+            Institutimiz tadqiqotchilari tomonidan suv namunalari olingan daryolar, suv omborlari, kanallar, artezian quduqlari va shahar tarmoqlari nuqtalari.
+          </p>
+        </div>
+
+        <!-- Filter Buttons & Quick Region Zoom -->
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-1.5 bg-[#f5fbff] p-1.5 rounded-2xl border border-[#e0edf7]">
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-[#078be5] text-white shadow-sm" data-filter="all">
+              Barchasi ({{ total_sources_count }})
+            </button>
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-[#183e70] hover:bg-sky-100/70" data-filter="Daryo suvi">
+              Daryolar
+            </button>
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-[#183e70] hover:bg-sky-100/70" data-filter="Suv ombori">
+              Suv omborlari
+            </button>
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-[#183e70] hover:bg-sky-100/70" data-filter="Buloq suvi">
+              Buloqlar
+            </button>
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-[#183e70] hover:bg-sky-100/70" data-filter="Vodoprovod suvi">
+              Vodoprovod
+            </button>
+            <button type="button" class="map-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-[#183e70] hover:bg-sky-100/70" data-filter="Artezian qudug'i">
+              Artezian
+            </button>
+          </div>
+
+          <!-- Tezkor Viloyatlarga O'tish (Jonli xarita harakati) -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
+              <i class="fa-solid fa-crosshairs text-sky-500"></i> Tezkor:
+            </span>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#123c70] bg-[#f8fafc] border border-slate-200 hover:bg-sky-50 hover:border-sky-300 transition-all" data-lat="39.654" data-lng="66.975" data-zoom="11">
+              📍 Samarqand
+            </button>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#123c70] bg-[#f8fafc] border border-slate-200 hover:bg-sky-50 hover:border-sky-300 transition-all" data-lat="41.2995" data-lng="69.2401" data-zoom="10">
+              📍 Toshkent
+            </button>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#123c70] bg-[#f8fafc] border border-slate-200 hover:bg-sky-50 hover:border-sky-300 transition-all" data-lat="39.7747" data-lng="64.4286" data-zoom="10">
+              📍 Buxoro
+            </button>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#123c70] bg-[#f8fafc] border border-slate-200 hover:bg-sky-50 hover:border-sky-300 transition-all" data-lat="40.3842" data-lng="71.7843" data-zoom="10">
+              📍 Farg‘ona
+            </button>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#123c70] bg-[#f8fafc] border border-slate-200 hover:bg-sky-50 hover:border-sky-300 transition-all" data-lat="41.556" data-lng="60.631" data-zoom="10">
+              📍 Xorazm
+            </button>
+            <button type="button" class="map-fly-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-white bg-[#078be5] hover:bg-[#0574c1] transition-all ml-auto" data-lat="41.3775" data-lng="64.5853" data-zoom="6.5">
+              🇺🇿 Butun Respublika
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Xarita konteyneri (Katta va qulay) -->
+      <div class="relative w-full rounded-2xl overflow-hidden border border-[#d5e2ed] shadow-inner">
+        <!-- Interactive Leaflet Map -->
+        <div id="uzb-water-map" class="w-full h-[540px] sm:h-[620px] bg-[#eef4f8] z-10"></div>
+
+        <!-- Legend Overlay (Pastki chap burchak) -->
+        <div class="absolute bottom-4 left-4 z-[400] bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 shadow-lg text-xs space-y-2 pointer-events-auto">
+          <div class="font-bold text-[#123c70] flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#078be5]"></span>
+            Manba Sifat Holati
+          </div>
+          <div class="flex items-center gap-2 text-[#11894a]">
+            <span class="w-3 h-3 rounded-full bg-[#18a65c] inline-block shadow-sm"></span>
+            <span>Yaroqli (Toza suv)</span>
+          </div>
+          <div class="flex items-center gap-2 text-amber-600">
+            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block shadow-sm"></span>
+            <span>Shartli yaroqli (Filtr zarur)</span>
+          </div>
+          <div class="flex items-center gap-2 text-rose-600">
+            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block shadow-sm"></span>
+            <span>Yaroqsiz (Iste'molga xavfli)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pastki Qisqacha Ko'rsatkichlar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+        <div class="p-3.5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] text-center">
+          <div class="text-xs text-[#61748a] font-semibold">Tadqiqot Nuqtalari</div>
+          <div class="text-xl font-black text-[#123c70] mt-0.5">{{ total_sources_count }} ta manba</div>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] text-center">
+          <div class="text-xs text-[#61748a] font-semibold">Qamrab Olingan Hudud</div>
+          <div class="text-xl font-black text-[#078be5] mt-0.5">{{ unique_regions_count }} ta viloyat</div>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] text-center">
+          <div class="text-xs text-[#61748a] font-semibold">Muntazam Monitoring</div>
+          <div class="text-xl font-black text-[#18a65c] mt-0.5">SanPiN 0211-06</div>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] text-center">
+          <div class="text-xs text-[#61748a] font-semibold">Sun'iy Intellekt Modeli</div>
+          <div class="text-xl font-black text-[#123c70] mt-0.5">WQI + Neyron Tarmoq</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 3: DASTUR HAQIDA VIDEO (SAYT KENGIDAGI SALOBATLI VA KATTA KARTA)
+       Mijoz talabi: Video kengligi saytning boshqa kartalari kabi to'liq kenglikda mos bo'lsin!
+       ========================================================================= -->
+  <section id="video-section" class="wide-container scroll-mt-20">
+    <div class="w-full rounded-3xl p-6 sm:p-8 bg-white border border-[#e0edf7] shadow-sm space-y-6">
+      
+      <!-- Video Sarlavhalari -->
+      <div class="text-center max-w-4xl mx-auto space-y-2.5">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold uppercase tracking-wider">
+          <i class="fa-solid fa-circle-play text-rose-500"></i>
+          <span>Video Taqdimot &amp; Amaliy Qo‘llanma</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#123c70] leading-tight">
+          WaterAI Tizimi Imkoniyatlari va Foydalanish Bo‘yicha Video Sharh
+        </h2>
+        <p class="text-xs sm:text-sm text-[#61748a] leading-relaxed max-w-2xl mx-auto">
+          Suv namunalarining laboratoriya sinovlari, parametrlar tahlili, neyron tarmoqlar orqali xavfsizlik indeksini hisoblash va tizimdan to‘g‘ri foydalanish bo‘yicha to‘liq videorolikni tomosha qiling.
+        </p>
+      </div>
+
+      <!-- Katta va Sayt Kengligiga Mos Video Player (Xarita bilan bir xil to'liq eni) -->
+      <div class="w-full aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl bg-black relative border border-slate-900/10">
+        <iframe 
+          src="https://www.youtube-nocookie.com/embed/syY24i81ZKk?rel=0&modestbranding=1" 
+          title="WaterAI tizimi taqdimoti va foydalanish yo'riqnomasi"
+          class="absolute inset-0 w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen
+          loading="lazy">
+        </iframe>
+      </div>
+
+      <!-- Video pastki ma'lumotlari -->
+      <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[#61748a]">
+        <div class="flex items-center gap-2 font-medium">
+          <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+          <span>Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="https://youtu.be/syY24i81ZKk" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-colors font-bold flex items-center gap-2">
+            <i class="fa-brands fa-youtube text-rose-600 text-base"></i>
+            <span>YouTube orqali ochish</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 4: SO‘NGGI O‘TKAZILGAN TAHLILLAR (MONITORING JURNALI)
+       ========================================================================= -->
+  <section id="analyses-section" class="wide-container scroll-mt-20">
+    <div class="rounded-3xl p-6 sm:p-8 bg-white border border-[#e0edf7] shadow-sm">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f5fbff] text-[#078be5] text-xs font-bold uppercase tracking-wider mb-1">
@@ -146,7 +334,7 @@
             So‘nggi o‘tkazilgan tahlillar
           </h2>
           <p class="text-xs sm:text-sm text-[#61748a] mt-0.5">
-            Suv namunalarining eng so‘nggi kimyoviy-fizik ko‘rsatkichlari va sun’iy intellekt xulosalari
+            Suv namunalarining eng so‘nggi fizik-kimyoviy ko‘rsatkichlari va sun’iy intellekt xulosalari
           </p>
         </div>
 
@@ -180,7 +368,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-[#e0edf7] text-sm font-medium">
-            {% for a in analyses[:6] %}
+            {% for a in analyses[:8] %}
             <tr class="hover:bg-[#f5fbff]/70 transition-colors">
               <td class="py-3.5 px-5 font-mono text-xs text-[#647991]">#{{ a.id }}</td>
               <td class="py-3.5 px-5 font-bold text-[#123c70]">
@@ -247,7 +435,7 @@
   </section>
 
   <!-- =========================================================================
-       SECTION 2: BIZ HAQIMIZDA (ABOUT SECTION)
+       SECTION 5: BIZ HAQIMIZDA (ABOUT.PNG BILAN BOYLASHTIRILGAN)
        ========================================================================= -->
   <section id="about" class="wide-container scroll-mt-20">
     <div class="rounded-3xl p-8 sm:p-12 bg-white border border-[#e0edf7] shadow-sm space-y-10">
@@ -255,69 +443,70 @@
       <!-- Sarlavha -->
       <div class="text-center max-w-3xl mx-auto space-y-3">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f0f7fc] text-[#078be5] text-xs font-bold uppercase tracking-wider">
-          <i class="fa-solid fa-graduation-cap"></i>
-          Samarqand Davlat Universiteti
+          <i class="fa-solid fa-building-columns"></i>
+          Ilmiy Tadqiqot Markazi
         </div>
         <h2 class="text-2xl sm:text-4xl font-black text-[#123c70] tracking-tight">
-          Biz Haqimizda &amp; Sun’iy Intellekt Laboratoriyasi
+          Biz Haqimizda &amp; Sun’iy Intellekt Instituti
         </h2>
         <p class="text-sm sm:text-base text-[#61748a] leading-relaxed">
-          Ushbu ilmiy-amaliy dasturiy platforma <b>Samarqand davlat universiteti</b> “Sun’iy intellekt laboratoriyasi” tadqiqotchilari tomonidan ishlab chiqilgan bo‘lib, mas’ul: <b>Salimova Maxbuba</b>.
+          Ushbu dasturiy platforma <b>Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti</b> tadqiqotchilari tomonidan yaratilgan bo‘lib, suv resurslari xavfsizligini ta’minlash va tezkor baholashga xizmat qiladi.
         </p>
       </div>
 
-      <!-- 3 Asosiy Ustun Kartalari -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
-          <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-2xl">
-            <i class="fa-solid fa-brain"></i>
+      <!-- Rasm va Ma'lumot Grid (about.png bilan) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Laboratoriya haqiqiy surati (about.png) -->
+        <div class="lg:col-span-6 rounded-3xl overflow-hidden border border-[#d5e2ed] shadow-xl group">
+          <div class="relative overflow-hidden">
+            <img src="/static/images/about.png" alt="SamDU Sun'iy intellekt laboratoriyasi" class="w-full h-[380px] sm:h-[440px] object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0a1e3b]/80 via-transparent to-transparent flex items-end p-6">
+              <div class="text-white">
+                <span class="px-3 py-1 rounded-full bg-[#078be5] text-xs font-bold uppercase tracking-wider">Ilmiy Laboratoriya</span>
+                <h4 class="text-lg font-bold mt-2">Sun'iy Intellekt va Raqamli Texnologiyalar Laboratoriyasi</h4>
+                <p class="text-xs text-sky-200 mt-1">Samarqand davlat universiteti</p>
+              </div>
+            </div>
           </div>
-          <h3 class="text-lg font-bold text-[#123c70]">AI va Neyron Tarmoq</h3>
-          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
-            10 dan ortiq asosiy fizik-kimyoviy parametrlar (pH, TDS, qattiqlik, turbidlik, sulfatlar va h.k.) o‘rtasidagi nochiziqli bog‘liqlikni chuqur tahlil qilib, suvning umumiy sifat indeksini (WQI) aniqlaydi.
-          </p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
-          <div class="w-12 h-12 rounded-xl bg-[#eafaf2] text-[#18a65c] flex items-center justify-center text-2xl">
-            <i class="fa-solid fa-shield-check"></i>
+        <!-- Institut va Laboratoriya Haqida Tavsif -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-2">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#e4f5ff] text-[#078be5] flex items-center justify-center text-lg">
+                <i class="fa-solid fa-microchip"></i>
+              </div>
+              <h3 class="text-base font-bold text-[#123c70]">Zamonaviy Ilmiy-Texnik Baza</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+              Laboratoriyamiz zamonaviy robototexnika, hisoblash serverlari va fizik-kimyoviy tahlil qurilmalari bilan jihozlangan bo‘lib, suv namunalaridagi nochiziqli munosabatlarni chuqur o‘rganish imkoniyatini yaratadi.
+            </p>
           </div>
-          <h3 class="text-lg font-bold text-[#123c70]">SanPiN 0211-06 va JSST</h3>
-          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
-            O‘zbekiston Respublikasi davlat sanitariya standartlari (SanPiN 0211-06) va Jahon Sog‘liqni Saqlash Tashkiloti (WHO) talablari asosida me’yoriy chegaralar qat’iy nazorat qilinadi.
-          </p>
-        </div>
 
-        <div class="p-6 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-3 transition-transform hover:-translate-y-1">
-          <div class="w-12 h-12 rounded-xl bg-[#f0f7fc] text-[#0574c1] flex items-center justify-center text-2xl">
-            <i class="fa-solid fa-filter"></i>
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-2">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#eafaf2] text-[#18a65c] flex items-center justify-center text-lg">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <h3 class="text-base font-bold text-[#123c70]">Davlat Standarti va SanPiN 0211-06</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+              O‘zbekiston Respublikasi gigiyenik me’yorlari va Jahon Sog‘liqni Saqlash Tashkiloti (JSST) tavsiyalariga asoslangan holda suvning 10 dan ziyod ko‘rsatkichlari solishtiriladi va tahlil qilinadi.
+            </p>
           </div>
-          <h3 class="text-lg font-bold text-[#123c70]">Mos Tozalash Tavsiyasi</h3>
-          <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
-            Har bir suv namunasining sifatiga qarab 6 xil yo‘nalishda (ichimlik, pishirish, maishiy, bolalar uchun) foydalanish ko‘rsatmalari hamda teskari osmos yoki uglerodli filtrlash usullari avtomatik beriladi.
-          </p>
-        </div>
 
-      </div>
-
-      <!-- University Credentials Banner -->
-      <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123c70] to-[#183e70] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-        <div class="space-y-2 text-center md:text-left">
-          <div class="text-xs font-bold uppercase tracking-wider text-sky-300">
-            Ilmiy Loyiha Raxbari va Mas'uli
+          <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] space-y-2">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#f0f7fc] text-[#0574c1] flex items-center justify-center text-lg">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <h3 class="text-base font-bold text-[#123c70]">AI Tavsiyalari va Filtrlash Yo‘riqnomasi</h3>
+            </div>
+            <p class="text-xs sm:text-sm text-[#647991] leading-relaxed">
+              Tahlil natijasiga ko‘ra suvni ichish, ovqat tayyorlash, maishiy maqsadlar va bolalar iste’moli uchun yaroqlilik darajasi hamda zaruriy tozalash choralari (teskari osmos, uglerodli filtr) avtomatik belgilanadi.
+            </p>
           </div>
-          <h4 class="text-xl sm:text-2xl font-black">
-            Salimova Maxbuba &mdash; Samarqand Davlat Universiteti
-          </h4>
-          <p class="text-xs sm:text-sm text-sky-100 max-w-2xl">
-            Aholini toza ichimlik suvi bilan ta’minlash, suv manbalarining ekologik barqarorligini nazorat qilish va AI yordamida tezkor monitoring tizimlarini rivojlantirish.
-          </p>
-        </div>
-
-        <div class="flex-shrink-0 text-center">
-          <div class="text-3xl font-black text-emerald-400">💧 Toza suv</div>
-          <div class="text-xs text-sky-200 mt-0.5">Barqaror kelajak kafolati!</div>
         </div>
       </div>
 
@@ -325,7 +514,121 @@
   </section>
 
   <!-- =========================================================================
-       SECTION 3: BOG'LANISH VA LABORATORIYA (CONTACT SECTION)
+       SECTION 6: BIZNING JAMOA (TEAMS PAPKASIDAGI ANIQ RASMLAR KETMA-KETLIGI BILAN)
+       Mijoz talabi: static/images/teams/ ichidagi 1.png, 2.png, 3.jpg fotosuratlari
+       va "Sun'iy intellekt va raqamli texnologiyalar" unvoni!
+       ========================================================================= -->
+  <section id="team" class="wide-container scroll-mt-20">
+    <div class="rounded-3xl p-8 sm:p-12 bg-white border border-[#e0edf7] shadow-sm space-y-10">
+      
+      <!-- Sarlavha -->
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f0f7fc] text-[#078be5] text-xs font-bold uppercase tracking-wider">
+          <i class="fa-solid fa-users"></i>
+          Ilmiy Va Muhandislik Tarkibi
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-black text-[#123c70] tracking-tight">
+          Bizning Jamoamiz
+        </h2>
+        <p class="text-sm sm:text-base text-[#61748a] leading-relaxed">
+          Loyiha muallifi va ilmiy rahbarining intellektual hamkorligi natijasi.
+        </p>
+      </div>
+
+      <!-- Jamoa A'zolari Kartochkalari (2 a'zo uchun mutanosib 2 ustunli tuzilma) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        
+        <!-- A'zo 1: Loyiha muallifi (1.png) -->
+        <div class="rounded-3xl p-7 bg-gradient-to-b from-[#f5fbff] to-white border-2 border-sky-200 shadow-lg shadow-sky-900/5 flex flex-col justify-between relative overflow-hidden group hover:border-[#078be5] transition-all">
+          <div class="absolute top-0 right-0 w-28 h-28 bg-[#078be5]/5 rounded-bl-full pointer-events-none"></div>
+          
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e4f5ff] text-[#078be5] text-[11px] font-extrabold uppercase tracking-wider mb-4">
+              <i class="fa-solid fa-medal text-amber-500"></i>
+              Loyiha Muallifi
+            </div>
+
+            <!-- Haqiqiy fotosurat: static/images/teams/1.png -->
+            <div class="mb-5 flex justify-center md:justify-start">
+              <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#078be5] shadow-lg bg-sky-50 group-hover:scale-105 transition-transform duration-300">
+                <img src="/static/images/teams/1.png" alt="Salimova Maxbuba Xidirbay qizi" class="w-full h-full object-cover object-top" onerror="this.onerror=null; this.src='/static/images/logo.png';">
+              </div>
+            </div>
+
+            <h3 class="text-xl font-black text-[#123c70]">
+              Salimova Maxbuba Xidirbay qizi
+            </h3>
+
+            <div class="mt-2 inline-block px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
+              🎖️ "Kelajak bunyodkori" medali sohibasi
+            </div>
+
+            <p class="mt-3 text-xs sm:text-sm text-[#61748a] leading-relaxed">
+              Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti tadqiqotchisi.
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-[#e0edf7] space-y-2 text-xs">
+            <div class="flex items-center gap-2 text-[#183e70]">
+              <i class="fa-solid fa-phone text-[#078be5]"></i>
+              <a href="tel:944774868" class="font-bold hover:text-[#078be5] transition-colors">+998 94 477 48 68</a>
+            </div>
+            <div class="flex items-center gap-2 text-[#183e70]">
+              <i class="fa-solid fa-envelope text-[#078be5]"></i>
+              <a href="mailto:maxbuba_salimova@samdu.uz" class="font-semibold hover:text-[#078be5] transition-colors">maxbuba_salimova@samdu.uz</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- A'zo 2: Ilmiy rahbar (2.png) -->
+        <div class="rounded-3xl p-7 bg-gradient-to-b from-[#f5fbff] to-white border border-[#e0edf7] shadow-lg shadow-sky-900/5 flex flex-col justify-between relative overflow-hidden group hover:border-[#078be5] transition-all">
+          <div class="absolute top-0 right-0 w-28 h-28 bg-[#18a65c]/5 rounded-bl-full pointer-events-none"></div>
+
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eafaf2] text-[#18a65c] text-[11px] font-extrabold uppercase tracking-wider mb-4">
+              <i class="fa-solid fa-graduation-cap"></i>
+              Ilmiy Rahbar
+            </div>
+
+            <!-- Haqiqiy fotosurat: static/images/teams/2.png -->
+            <div class="mb-5 flex justify-center md:justify-start">
+              <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-[#18a65c] shadow-lg bg-emerald-50 group-hover:scale-105 transition-transform duration-300">
+                <img src="/static/images/teams/2.png" alt="Nazarov Fayzullo Maxmadiyarovich" class="w-full h-full object-cover object-top" onerror="this.onerror=null; this.src='/static/images/logo.png';">
+              </div>
+            </div>
+
+            <h3 class="text-xl font-black text-[#123c70]">
+              Nazarov Fayzullo Maxmadiyarovich
+            </h3>
+
+            <div class="mt-2 inline-block px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+              📚 DSc, dotsent
+            </div>
+
+            <p class="mt-3 text-xs sm:text-sm text-[#61748a] leading-relaxed">
+              Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti. Ilmiy loyiha va tadqiqotlar rahbari.
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-[#e0edf7] space-y-2 text-xs">
+            <div class="flex items-center gap-2 text-[#183e70]">
+              <i class="fa-solid fa-building-columns text-[#18a65c]"></i>
+              <span class="font-semibold">Samarqand davlat universiteti</span>
+            </div>
+            <div class="flex items-center gap-2 text-[#123c70] font-semibold">
+              <i class="fa-solid fa-microscope text-[#18a65c]"></i>
+              <span>Sun'iy intellekt va raqamli texnologiyalar instituti</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 7: BOG‘LANISH VA LOKATSIYA (MUALLIF KONTAKTLARI BILAN)
        ========================================================================= -->
   <section id="contact" class="wide-container scroll-mt-20">
     <div class="rounded-3xl p-8 sm:p-12 bg-white border border-[#e0edf7] shadow-sm space-y-8">
@@ -336,10 +639,10 @@
           Aloqa &amp; Maslahat
         </div>
         <h2 class="text-2xl sm:text-4xl font-black text-[#123c70] tracking-tight">
-          Laboratoriya Bilan Bog‘lanish
+          Biz Bilan Bog‘lanish
         </h2>
         <p class="text-xs sm:text-sm text-[#61748a]">
-          Suv tahlillari, ilmiy hamkorlik yoki sensorlar integratsiyasi bo‘yicha savollaringiz bormi? Biz bilan bog‘laning.
+          Suv tahlillari, ilmiy hamkorlik yoki sensorlar integratsiyasi bo‘yicha savollaringiz bormi? Loyiha muallifi bilan to‘g‘ridan-to‘g‘ri bog‘lanishingiz mumkin.
         </p>
       </div>
 
@@ -348,47 +651,55 @@
         <!-- Contact Information Cards (5 cols) -->
         <div class="lg:col-span-5 space-y-4">
           
+          <!-- Manzil (Yangilangan lokatsiya) -->
           <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
               <i class="fa-solid fa-location-dot"></i>
             </div>
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Manzil</div>
-              <div class="text-sm font-bold text-[#123c70] mt-0.5">Samarqand shahri, Intellektual Tizimlar va Kompyuter Texnologiyalari fakulteti</div>
-              <div class="text-xs text-[#647991]">Samarqand davlat universiteti (SamDU)</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Rasmiy Manzil</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti</div>
+              <div class="text-xs text-[#647991]">Samarqand shahri, Universitet xiyoboni, SamDU</div>
             </div>
           </div>
 
+          <!-- Loyiha muallifi -->
           <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-[#eafaf2] text-[#18a65c] flex-shrink-0 flex items-center justify-center text-xl">
               <i class="fa-solid fa-user-tie"></i>
             </div>
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Mas’ul Shaxs</div>
-              <div class="text-sm font-bold text-[#123c70] mt-0.5">Salimova Maxbuba</div>
-              <div class="text-xs text-[#647991]">“Sun’iy intellekt laboratoriyasi” koordinatori</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Loyiha Muallifi</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">Salimova Maxbuba Xidirbay qizi</div>
+              <div class="text-xs text-amber-700 font-semibold">"Kelajak bunyodkori" medali sohibasi</div>
             </div>
           </div>
 
+          <!-- Telefon (Muallif telefoni: 944774868) -->
           <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
               <i class="fa-solid fa-phone"></i>
             </div>
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Telefon</div>
-              <div class="text-sm font-bold text-[#123c70] mt-0.5">+998 (71) 200-00-00</div>
-              <div class="text-xs text-[#647991]">Dush &ndash; Juma, 09:00 &ndash; 18:00</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Telefon Raqam</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">
+                <a href="tel:944774868" class="hover:text-[#078be5] transition-colors">+998 94 477 48 68</a>
+              </div>
+              <div class="text-xs text-[#647991]">Dushanba &ndash; Shanba, 09:00 &ndash; 18:00</div>
             </div>
           </div>
 
+          <!-- Email (Muallif emaili: maxbuba_salimova@samdu.uz) -->
           <div class="p-5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-[#e4f5ff] text-[#078be5] flex-shrink-0 flex items-center justify-center text-xl">
               <i class="fa-solid fa-envelope"></i>
             </div>
             <div>
-              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Elektron pochta</div>
-              <div class="text-sm font-bold text-[#123c70] mt-0.5">info@waterai.uz</div>
-              <div class="text-xs text-[#647991]">lab@samdu.uz</div>
+              <div class="text-xs font-bold uppercase tracking-wider text-[#61748a]">Elektron Pochta</div>
+              <div class="text-sm font-bold text-[#123c70] mt-0.5">
+                <a href="mailto:maxbuba_salimova@samdu.uz" class="hover:text-[#078be5] transition-colors">maxbuba_salimova@samdu.uz</a>
+              </div>
+              <div class="text-xs text-[#647991]">info@waterai.uz</div>
             </div>
           </div>
 
@@ -403,7 +714,7 @@
               </div>
               <div>
                 <h3 class="text-sm font-bold text-[#123c70]">Xaritadagi Manzil</h3>
-                <p class="text-xs text-[#61748a]">Intellektual Tizimlar va Kompyuter Texnologiyalari fakulteti, SamDU</p>
+                <p class="text-xs text-[#61748a]">Samarqand davlat universiteti Sun'iy intellekt va raqamli texnologiyalar instituti</p>
               </div>
             </div>
             <a href="https://maps.app.goo.gl/xXjiVL8BGdERww936" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-[#078be5] hover:bg-[#0574c1] shadow-sm transition-all flex items-center gap-1.5 self-end sm:self-auto">
@@ -431,4 +742,276 @@
   </section>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // =========================================================================
+  // 1. HERO FON SLAYDERI SKRIPTI (CROSSFADE & AVTO-ALMASHUV)
+  // =========================================================================
+  (function initHeroSlider() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    const prevBtn = document.getElementById('slider-prev');
+    const nextBtn = document.getElementById('slider-next');
+
+    if (!slides || slides.length === 0) return;
+
+    let currentIndex = 0;
+    let timer = null;
+
+    function showSlide(index) {
+      if (index < 0) index = slides.length - 1;
+      if (index >= slides.length) index = 0;
+      currentIndex = index;
+
+      slides.forEach((s, i) => {
+        if (i === currentIndex) {
+          s.classList.remove('opacity-0');
+          s.classList.add('opacity-100', 'active');
+        } else {
+          s.classList.remove('opacity-100', 'active');
+          s.classList.add('opacity-0');
+        }
+      });
+
+      dots.forEach((d, i) => {
+        if (i === currentIndex) {
+          d.classList.add('bg-white', 'w-5');
+          d.classList.remove('bg-white/50');
+        } else {
+          d.classList.remove('bg-white', 'w-5');
+          d.classList.add('bg-white/50');
+        }
+      });
+    }
+
+    function nextSlide() {
+      showSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      showSlide(currentIndex - 1);
+    }
+
+    function resetTimer() {
+      if (timer) clearInterval(timer);
+      if (slides.length > 1) {
+        timer = setInterval(nextSlide, 5500);
+      }
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        resetTimer();
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        resetTimer();
+      });
+    }
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.getAttribute('data-index') || '0', 10);
+        showSlide(idx);
+        resetTimer();
+      });
+    });
+
+    resetTimer();
+  })();
+
+  // =========================================================================
+  // 2. O‘ZBEKISTON XARITASI SKRIPTI (ANIQ VA ISHONCHLI OPENSTREETMAP KAFELARI)
+  // =========================================================================
+  (function initUzbekistanMap() {
+    const mapElement = document.getElementById('uzb-water-map');
+    if (!mapElement || typeof L === 'undefined') return;
+
+    // O'zbekiston markazi bo'yicha markazlashtirish (sichqoncha bilan yaqinlashtirish va boshqarish yoqildi)
+    const map = L.map('uzb-water-map', {
+      center: [41.3775, 64.5853],
+      zoom: 6.5,
+      minZoom: 5.0,
+      maxZoom: 16,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      dragging: true,
+      touchZoom: true,
+      boxZoom: true
+    });
+
+    // 100% ochiq, bepul va hech qanday API kalit talab qilmaydigan OpenStreetMap rasmiy kafelari
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // O'zbekiston hududini to'liq qamrab olish (fitBounds)
+    map.fitBounds([
+      [37.15, 55.95], // Janubiy-g'arbiy burchak (Termiz / Qoraqalpog'iston chegarasi)
+      [45.60, 73.15]  // Shimoliy-sharqiy burchak (Orolbo'yi / Farg'ona vodiysi)
+    ]);
+
+    // O'zbekiston chegarasi GeoJSON qatlami (agar mavjud bo'lsa chiziladi)
+    fetch('/static/js/uzb_boundary.geojson')
+      .then(res => res.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: {
+            color: '#078be5',
+            weight: 2.5,
+            opacity: 0.85,
+            fillColor: '#078be5',
+            fillOpacity: 0.05
+          }
+        }).addTo(map);
+      })
+      .catch(err => console.log('Uzb boundary note:', err));
+
+    // Suv manbalari ma'lumotlari (Backenddan uzatilgan)
+    const waterSources = {{ water_sources|tojson if water_sources else '[]' }};
+    const markers = [];
+
+    // Har bir manba uchun rang va chiroyli pin
+    function getStatusColor(status) {
+      if (status === 'valid') return '#18a65c';
+      if (status === 'conditional') return '#d97706';
+      return '#e11d48';
+    }
+
+    function createCustomIcon(status) {
+      const color = getStatusColor(status);
+      return L.divIcon({
+        className: 'custom-water-marker',
+        html: `
+          <div style="position: relative; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+            <div class="water-marker-pulse" style="background: ${color};"></div>
+            <div class="water-marker-core" style="
+              position: relative;
+              width: 24px;
+              height: 24px;
+              background: ${color};
+              border: 2.5px solid white;
+              border-radius: 50%;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-size: 10px;
+              cursor: pointer;
+            ">
+              <i class="fa-solid fa-droplet"></i>
+            </div>
+          </div>
+        `,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -17]
+      });
+    }
+
+    // Markerlarni xaritaga joylashtirish
+    waterSources.forEach(source => {
+      const marker = L.marker([source.lat, source.lng], {
+        icon: createCustomIcon(source.status)
+      }).addTo(map);
+
+      // Jonli Hover Tooltip (Kursor yaqinlashganda tezkor ko'rsatish)
+      marker.bindTooltip(`
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${getStatusColor(source.status)};"></span>
+          <span>${source.name}</span>
+          <span style="opacity:0.8; font-weight:normal; font-size:10px;">(${source.quality_score}/100)</span>
+        </div>
+      `, {
+        direction: 'top',
+        offset: [0, -18],
+        className: 'custom-map-tooltip'
+      });
+
+      // Popup kontenti
+      const statusBadge = source.status === 'valid'
+        ? '<span style="background:#eafaf2; color:#11894a; border:1px solid #b9e8cf; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:11px;">🟢 Yaroqli (Toza)</span>'
+        : (source.status === 'conditional'
+            ? '<span style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:11px;">🟡 Shartli yaroqli</span>'
+            : '<span style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:2px 8px; border-radius:12px; font-weight:bold; font-size:11px;">🔴 Yaroqsiz</span>');
+
+      const popupContent = `
+        <div style="font-family: inherit; min-width: 240px; padding: 4px;">
+          <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 2px;">
+            ${source.region} • ${source.source_type}
+          </div>
+          <h4 style="margin: 0 0 6px 0; color: #123c70; font-size: 14px; font-weight: 800; line-height: 1.3;">
+            ${source.name}
+          </h4>
+          <div style="margin-bottom: 8px;">
+            ${statusBadge}
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; background: #f8fafc; padding: 6px 8px; border-radius: 8px; margin-bottom: 8px;">
+            <div><b>pH:</b> ${source.ph}</div>
+            <div><b>TDS:</b> ${source.tds} mg/L</div>
+            <div><b>WQI:</b> ${source.quality_score}/100</div>
+            <div><b>Loyqalik:</b> ${source.turbidity} NTU</div>
+          </div>
+          <p style="font-size: 11px; color: #475569; margin: 0 0 8px 0; line-height: 1.35;">
+            ${source.desc}
+          </p>
+          <a href="/analyze?sample_name=${encodeURIComponent(source.name)}&source_type=${encodeURIComponent(source.source_type)}&ph=${source.ph}&tds=${source.tds}&turbidity=${source.turbidity}" 
+             style="display: inline-block; background: #078be5; color: white; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none;">
+            Laboratoriya tahlili o'tkazish &rarr;
+          </a>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      marker.sourceData = source;
+      markers.push(marker);
+    });
+
+    // Tezkor Viloyatlarga Fly-To Harakatlari
+    const flyBtns = document.querySelectorAll('.map-fly-btn');
+    flyBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lat = parseFloat(btn.getAttribute('data-lat'));
+        const lng = parseFloat(btn.getAttribute('data-lng'));
+        const zoom = parseFloat(btn.getAttribute('data-zoom') || '10');
+        map.flyTo([lat, lng], zoom, {
+          duration: 1.4,
+          easeLinearity: 0.25
+        });
+      });
+    });
+
+    // Filtrlash tugmalari hodisasi
+    const filterBtns = document.querySelectorAll('.map-filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-[#078be5]', 'text-white', 'shadow-sm');
+          b.classList.add('text-[#183e70]');
+        });
+        btn.classList.add('bg-[#078be5]', 'text-white', 'shadow-sm');
+        btn.classList.remove('text-[#183e70]');
+
+        const filterType = btn.getAttribute('data-filter');
+
+        markers.forEach(marker => {
+          if (filterType === 'all' || marker.sourceData.source_type === filterType) {
+            if (!map.hasLayer(marker)) map.addLayer(marker);
+          } else {
+            if (map.hasLayer(marker)) map.removeLayer(marker);
+          }
+        });
+      });
+    });
+
+  })();
+</script>
 {% endblock %}
