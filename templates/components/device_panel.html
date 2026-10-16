@@ -1,0 +1,51 @@
+<!-- PH-W218 qurilmasiga ulanish paneli (static/js/device.js boshqaradi) -->
+<div id="devicePanel" class="glass-panel rounded-3xl p-5 border border-sky-100 shadow-sm">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-tr from-[#078be5] to-[#4fb8ff] text-white flex items-center justify-center shadow-md shadow-sky-200">
+        <i class="fa-solid fa-microchip text-lg"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="text-sm font-bold text-slate-800">
+          PH-W218 qurilmasi
+          <span class="text-xs text-slate-400 font-medium">· 8 in 1 suv sifati testeri</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs">
+          <span id="devDot" class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block"></span>
+          <span id="devStateText" class="font-bold text-slate-500">Ulanmagan</span>
+          <span id="devMeta" class="text-slate-400"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        id="devConnectBtn"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#078be5] hover:bg-[#0574c1] shadow-md shadow-sky-200 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-wait"
+      >
+        <i class="fa-solid fa-plug"></i>
+        <span>Qurilmaga ulanish</span>
+      </button>
+      <button
+        type="button"
+        id="devDisconnectBtn"
+        class="hidden px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 bg-white border border-rose-200 hover:bg-rose-50 transition-all flex items-center gap-2"
+      >
+        <i class="fa-solid fa-plug-circle-xmark"></i>
+        <span>Uzish</span>
+      </button>
+      {% if device_panel_link %}
+      <a
+        href="{{ device_panel_link.href }}"
+        class="px-4 py-2.5 rounded-xl text-xs font-bold text-[#123c70] bg-white border border-slate-200 hover:border-sky-300 hover:bg-sky-50 transition-all flex items-center gap-2"
+      >
+        <i class="fa-solid {{ device_panel_link.icon }} text-[#078be5]"></i>
+        <span>{{ device_panel_link.label }}</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="devMessage" class="hidden mt-3 text-xs font-medium rounded-xl px-3 py-2 border"></div>
+</div>

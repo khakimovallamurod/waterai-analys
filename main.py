@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status, Query
-from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
@@ -18,9 +18,10 @@ from sqlalchemy.orm import Session
 
 import ai_engine
 import auth
-from database import engine, Base, get_db
+from database import engine, Base, get_db, migrate_columns
 from models import User, WaterAnalysis, ParameterNorm, WaterSource
 from water_sources import get_water_sources
+from ph_w218 import ph_service
 
 
 # ==============================================================================
@@ -183,12 +184,15 @@ def seed_initial_data(db: Session):
 async def lifespan(app: FastAPI):
     # Dastur ishga tushganda jadvallarni yaratish va ma'lumotlarni kiritish
     Base.metadata.create_all(bind=engine)
+    migrate_columns()
     db = next(get_db())
     try:
         seed_initial_data(db)
     finally:
         db.close()
     yield
+    # Dastur to'xtaganda PH-W218 ulanishini yopish
+    ph_service.disconnect()
 
 
 # ==============================================================================
@@ -302,6 +306,7 @@ def analyze_page(request: Request, db: Session = Depends(get_db)):
     """Suv parametrlarini kiritish sahifasi"""
     current_user = auth.get_current_user_optional(request, db)
     ctx = get_base_context(request, active_page="analyze", current_user=current_user)
+    ctx["mode"] = "device" if request.query_params.get("mode") == "device" else "standard"
     return templates.TemplateResponse(request=request, name="user/analyze.html", context=ctx)
 
 
@@ -322,10 +327,19 @@ def handle_analyze(
     organic: float = Form(2.0),
     trihalomethanes: float = Form(10.0),
     extra_param: Optional[str] = Form("Tanlang"),
+    data_source: str = Form("manual"),
+    salinity: Optional[float] = Form(None),
+    orp: Optional[float] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Parametrlarni qabul qilib, AI orqali hisoblash va natijani saqlash"""
     current_user = auth.get_current_user_optional(request, db)
+    # "device" — qurilmadan real o'lchov, "device_default" — qurilma parametrlari standart qiymatlar bilan
+    if data_source == "device" and ph_service.state not in ("online", "reconnecting"):
+        data_source = "device_default"
+    if data_source not in ("device", "device_default"):
+        data_source = "manual"
+    is_device = data_source != "manual"
 
     input_data = {
         "ph": ph,
@@ -338,6 +352,9 @@ def handle_analyze(
         "trihalomethanes": trihalomethanes,
         "temperature": temperature,
         "ec": ec,
+        "salinity": salinity,
+        "orp": orp,
+        "data_source": data_source,
         "source_type": source_type
     }
 
@@ -359,6 +376,9 @@ def handle_analyze(
         organic=organic,
         trihalomethanes=trihalomethanes,
         extra_param=extra_param,
+        data_source=data_source,
+        salinity=salinity if is_device else None,
+        orp=orp if is_device else None,
         status=results["status"],
         status_label=results["status_label"],
         quality_score=results["quality_score"],
@@ -397,12 +417,17 @@ def view_result(request: Request, analysis_id: int, db: Session = Depends(get_db
         "trihalomethanes": analysis.trihalomethanes,
         "temperature": analysis.temperature,
         "ec": analysis.ec,
+        "salinity": analysis.salinity,
+        "orp": analysis.orp,
+        "data_source": analysis.data_source,
         "source_type": analysis.source_type
     })
 
     ctx = get_base_context(request, active_page="analyze", current_user=current_user)
     ctx.update({
         "analysis": analysis,
+        "is_device": (analysis.data_source or "").startswith("device"),
+        "is_real_device": analysis.data_source == "device",
         "usage_recommendations": engine_details["usage_recommendations"],
         "norm_analysis": engine_details["norm_analysis"],
         "feature_importance": engine_details["feature_importance"],
@@ -465,6 +490,25 @@ def export_single_csv(analysis_id: int, db: Session = Depends(get_db)):
     writer.writerow(["WQI Indeksi", f"{analysis.quality_score:.1f}", "100", ""])
     writer.writerow(["Umumiy Baho", analysis.status_label, "", ""])
     writer.writerow([])
+    if (analysis.data_source or "").startswith("device"):
+        source_text = "PH-W218 qurilmasi (real o'lchov)" if analysis.data_source == "device" else "PH-W218 parametrlari (standart qiymatlar)"
+        writer.writerow(["Manba", source_text, "", ""])
+        writer.writerow([])
+        writer.writerow(["Ko'rsatkichlar", "O'lchangan", "Me'yor", "Holat"])
+        device_res = ai_engine.analyze_device_sample({
+            "ph": analysis.ph, "tds": analysis.tds, "ec": analysis.ec,
+            "salinity": analysis.salinity, "orp": analysis.orp, "temperature": analysis.temperature
+        })
+        for p in device_res["parameters_table"]:
+            writer.writerow([p["name"], p["value"], p["norm"], "Normal" if p["good"] else "Me'yordan chetlashgan"])
+        writer.writerow([])
+        writer.writerow(["AI Tavsiyasi", analysis.ai_recommendation.replace("<b>", "").replace("</b>", ""), "", ""])
+        return Response(
+            content=output.getvalue(),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=water_analysis_{analysis.id}.csv"}
+        )
+
     writer.writerow(["Ko'rsatkichlar", "Kiritilgan", "SanPiN Me'yori", "Holat"])
     writer.writerow(["pH", f"{analysis.ph:.2f}", "6.5 - 8.5", "Normal" if 6.5 <= analysis.ph <= 8.5 else "Me'yordan chetlashgan"])
     writer.writerow(["TDS (mg/L)", f"{analysis.tds:.0f}", "<= 1000", "Normal" if analysis.tds <= 1000 else "Yuqori"])
@@ -1095,6 +1139,89 @@ def toggle_user_role(request: Request, user_id: int, db: Session = Depends(get_d
 
 
 # ==============================================================================
+# PH-W218 Qurilmasi: Jonli Monitoring va Dataset
+# ==============================================================================
+
+@app.get("/monitoring", response_class=HTMLResponse)
+def monitoring_page(request: Request, db: Session = Depends(get_db)):
+    """PH-W218 qurilmasidan real vaqt monitoringi va dataset yig'ish sahifasi"""
+    current_user = auth.get_current_user_optional(request, db)
+    ctx = get_base_context(request, active_page="monitoring", current_user=current_user)
+    return templates.TemplateResponse(request=request, name="user/monitoring.html", context=ctx)
+
+
+@app.get("/api/device/status")
+def api_device_status():
+    """Qurilmaning joriy holati va oxirgi o'lchovlari"""
+    return ph_service.snapshot()
+
+
+@app.post("/api/device/connect")
+def api_device_connect():
+    """Qurilmaga ulanishga urinish (bloklovchi, ~3-6 soniya)"""
+    ok, message = ph_service.connect()
+    return {"ok": ok, "message": message, "status": ph_service.snapshot()}
+
+
+@app.post("/api/device/disconnect")
+def api_device_disconnect():
+    ph_service.disconnect()
+    return {"ok": True, "message": "Qurilma uzildi", "status": ph_service.snapshot()}
+
+
+@app.get("/api/device/history")
+def api_device_history(limit: int = Query(1800, ge=1, le=1800)):
+    """Joriy ulanish davomidagi o'lchovlar tarixi (grafiklar uchun)"""
+    return ph_service.get_history(limit)
+
+
+class RecordingStartRequest(BaseModel):
+    sample_name: str = Field("PH-W218 namunasi", max_length=150)
+    source_type: str = Field("Vodoprovod suvi", max_length=50)
+    location: Optional[str] = Field("", max_length=100)
+    label: Optional[str] = Field("", max_length=50)
+    heartbeat_sec: int = Field(0, ge=0, le=3600)
+
+
+@app.post("/api/device/recording/start")
+def api_recording_start(payload: RecordingStartRequest):
+    """Dataset yig'ish sessiyasini boshlash"""
+    if ph_service.state not in ("online", "reconnecting"):
+        return JSONResponse(status_code=409, content={"ok": False, "message": "Avval qurilmaga ulaning"})
+    ph_service.recorder.start(
+        payload.sample_name, payload.source_type, payload.location or "",
+        payload.label or "", payload.heartbeat_sec
+    )
+    return {"ok": True, "message": "Dataset yig'ish boshlandi", "status": ph_service.snapshot()}
+
+
+@app.post("/api/device/recording/stop")
+def api_recording_stop():
+    ph_service.recorder.stop()
+    return {"ok": True, "message": "Dataset yig'ish to'xtatildi", "status": ph_service.snapshot()}
+
+
+@app.get("/api/device/dataset.csv")
+def api_dataset_download():
+    """Yig'ilgan PH-W218 datasetini CSV ko'rinishida yuklab olish"""
+    path = ph_service.recorder.path
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Dataset hali bo'sh")
+    filename = f"ph_w218_dataset_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    return FileResponse(path, media_type="text/csv", filename=filename)
+
+
+@app.post("/api/device/dataset/clear")
+def api_dataset_clear(request: Request, db: Session = Depends(get_db)):
+    """Datasetni tozalash (faqat admin)"""
+    current_user = auth.get_current_user_optional(request, db)
+    if not current_user or current_user.role != "admin":
+        return JSONResponse(status_code=403, content={"ok": False, "message": "Faqat admin datasetni tozalay oladi"})
+    ph_service.recorder.clear()
+    return {"ok": True, "message": "Dataset tozalandi", "status": ph_service.snapshot()}
+
+
+# ==============================================================================
 # REST API Endpoints (JSON)
 # ==============================================================================
 
@@ -1194,8 +1321,11 @@ def api_get_analysis(analysis_id: int, db: Session = Depends(get_db)):
             "chloramines": a.chloramines,
             "organic": a.organic,
             "trihalomethanes": a.trihalomethanes,
-            "temperature": a.temperature
+            "temperature": a.temperature,
+            "salinity": a.salinity,
+            "orp": a.orp
         },
+        "data_source": a.data_source,
         "quality_score": a.quality_score,
         "status": a.status,
         "status_label": a.status_label,

@@ -39,6 +39,11 @@ class WaterAnalysis(Base):
     trihalomethanes = Column(Float, default=10.0, nullable=False)
     extra_param = Column(String(50), default="Tanlang", nullable=True)
 
+    # Ma'lumot manbai: "manual" (qo'lda kiritilgan) yoki "device" (PH-W218 qurilmasi)
+    data_source = Column(String(20), default="manual", nullable=False)
+    salinity = Column(Float, nullable=True)
+    orp = Column(Float, nullable=True)
+
     # Tahlil natijalari
     status = Column(String(20), default="valid", nullable=False)  # "valid", "conditional", "invalid"
     status_label = Column(String(50), default="🟢 Yaroqli", nullable=False)

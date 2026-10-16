@@ -15,9 +15,37 @@
       Suv parametrlarini kiriting
     </h1>
     <p class="mt-2 text-sm text-slate-500">
+      {% if mode == 'device' %}
+      PH-W218 qurilmasiga ulaning — tahlil qurilmaning real o‘lchovlari bo‘yicha bajariladi
+      {% else %}
       Suv namunasining asosiy ko‘rsatkichlarini slayderlar orqali sozlang yoki tayyor namunalardan birini tanlang
+      {% endif %}
     </p>
   </div>
+
+  <!-- Tahlil turi tablari -->
+  <div class="flex justify-center">
+    <div class="inline-flex w-full sm:w-auto p-1.5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <a
+        href="/analyze"
+        class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all {% if mode != 'device' %}bg-[#078be5] text-white shadow-md shadow-sky-200{% else %}text-[#183e70] hover:bg-sky-50{% endif %}"
+      >
+        <i class="fa-solid fa-sliders"></i>
+        <span>Standart tahlil</span>
+      </a>
+      <a
+        href="/analyze?mode=device"
+        class="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all {% if mode == 'device' %}bg-[#18a65c] text-white shadow-md shadow-emerald-200{% else %}text-[#183e70] hover:bg-sky-50{% endif %}"
+      >
+        <i class="fa-solid fa-tower-broadcast"></i>
+        <span>Qurilmadan tahlil (PH-W218)</span>
+      </a>
+    </div>
+  </div>
+
+  {% if mode == 'device' %}
+  {% include 'user/_analyze_device.html' %}
+  {% else %}
 
   <!-- Namunalar (Presets) Bloki -->
   <div class="glass-panel rounded-3xl p-5 border border-sky-100 shadow-sm">
@@ -461,10 +489,16 @@
     </div>
 
   </form>
+  {% endif %}
 
 </div>
 {% endblock %}
 
 {% block scripts %}
+{% if mode == 'device' %}
+<script src="/static/js/device.js"></script>
+<script src="/static/js/device_analyze.js"></script>
+{% else %}
 <script src="/static/js/analyze.js"></script>
+{% endif %}
 {% endblock %}

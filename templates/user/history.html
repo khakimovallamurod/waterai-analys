@@ -81,11 +81,14 @@
               <span class="px-2 py-0.5 rounded-md bg-slate-100 text-xs font-semibold text-slate-600">
                 {{ a.source_type }}
               </span>
+              {% if (a.data_source or '').startswith('device') %}
+              <span class="ml-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-[10px] font-bold text-emerald-700" title="PH-W218 qurilmasidan"><i class="fa-solid fa-tower-broadcast"></i></span>
+              {% endif %}
             </td>
             <td class="py-3.5 px-5 font-mono text-xs">{{ "%.2f"|format(a.ph) }}</td>
             <td class="py-3.5 px-5 font-mono text-xs">{{ "%.0f"|format(a.tds) }} mg/L</td>
-            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.1f"|format(a.turbidity) }} NTU</td>
-            <td class="py-3.5 px-5 font-mono text-xs">{{ "%.0f"|format(a.hardness) }} mg/L</td>
+            <td class="py-3.5 px-5 font-mono text-xs">{% if (a.data_source or '').startswith('device') %}<span class="text-slate-300">—</span>{% else %}{{ "%.1f"|format(a.turbidity) }} NTU{% endif %}</td>
+            <td class="py-3.5 px-5 font-mono text-xs">{% if (a.data_source or '').startswith('device') %}<span class="text-slate-300">—</span>{% else %}{{ "%.0f"|format(a.hardness) }} mg/L{% endif %}</td>
             <td class="py-3.5 px-5">
               {% if a.status == 'valid' %}
               <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
@@ -156,7 +159,7 @@
           </div>
           <div>
             <div class="text-[10px] text-slate-400">Turbid</div>
-            <div class="font-bold">{{ "%.1f"|format(a.turbidity) }}</div>
+            <div class="font-bold">{% if (a.data_source or '').startswith('device') %}—{% else %}{{ "%.1f"|format(a.turbidity) }}{% endif %}</div>
           </div>
           <div>
             <div class="text-[10px] text-slate-400">Qattiqlik</div>
