@@ -1,87 +1,67 @@
+{# Navigatsiya: keng ekranda (>=1400px) to'liq menyu, undan kichikda gamburger menyu #}
+{% set nav_links = [
+  {"href": "/#home", "label": "Bosh sahifa", "icon": "fa-house", "color": "", "key": "home"},
+  {"href": "/#map-section", "label": "Xarita", "icon": "fa-map-location-dot", "color": "text-[#078be5]", "key": ""},
+  {"href": "/#video-section", "label": "Video", "icon": "fa-circle-play", "color": "text-rose-500", "key": ""},
+  {"href": "/#analyses-section", "label": "Tahlillar", "icon": "fa-flask", "color": "text-[#18a65c]", "key": ""},
+  {"href": "/#about", "label": "Biz haqimizda", "icon": "fa-circle-info", "color": "", "key": ""},
+  {"href": "/#team", "label": "Jamoamiz", "icon": "fa-users", "color": "text-indigo-500", "key": ""},
+  {"href": "/#contact", "label": "Bog‘lanish", "icon": "fa-address-book", "color": "", "key": ""},
+] %}
+{% set nav_links_after = [
+  {"href": "/monitoring", "label": "Monitoring", "icon": "fa-tower-broadcast", "color": "text-[#18a65c]", "key": "monitoring"},
+  {"href": "/stats", "label": "Statistika", "icon": "fa-chart-pie", "color": "", "key": "stats"},
+  {"href": "/history", "label": "Tarix", "icon": "fa-clock-rotate-left", "color": "", "key": "history"},
+] %}
+
 <nav class="sticky top-0 z-40 w-full glass-panel border-b border-[#e0edf7] shadow-sm transition-all backdrop-blur-xl bg-white/90">
   <div class="wide-container">
-    <div class="flex justify-between h-16 items-center">
-      
+    <div class="flex justify-between h-16 items-center gap-3">
+
       <!-- Brand Logo -->
-      <a href="/" class="flex items-center space-x-3 group">
+      <a href="/" class="flex items-center gap-2.5 group min-w-0 shrink-0">
         <img src="/static/images/logo.png" alt="WaterAI Logo" class="w-11 h-11 sm:w-12 sm:h-12 min-w-[2.75rem] flex-shrink-0 object-contain drop-shadow group-hover:scale-105 transition-transform">
-        <div class="min-w-0">
-          <span class="text-xl font-black tracking-tight text-[#123c70]">
+        <div class="min-w-0 leading-tight">
+          <span class="block text-xl font-black tracking-tight text-[#123c70]">
             Suv<span class="text-[#078be5]">AI</span>
           </span>
-          <span class="text-[9px] block font-bold text-[#61748a] tracking-wider uppercase -mt-1">
+          <span class="hidden sm:block text-[9px] font-bold text-[#61748a] tracking-wider uppercase whitespace-nowrap min-[1400px]:hidden min-[1750px]:block">
             SamDU Sun'iy Intellekt va RT Instituti
           </span>
         </div>
       </a>
 
-      <!-- Desktop Navigation Links (Sections: Bosh sahifa, Xarita, Video, Tahlillar, Biz haqimizda, Jamoa, Bog'lanish) -->
-      <div class="hidden lg:flex items-center space-x-1">
-        <a href="/#home" class="px-2.5 py-1.5 rounded-xl text-xs font-bold {% if active_page == 'home' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-house text-[11px]"></i>
-          Bosh sahifa
+      <!-- Desktop menyu (>=1400px) -->
+      <div class="hidden min-[1400px]:flex items-center gap-0.5">
+        {% for l in nav_links %}
+        <a href="{{ l.href }}" class="px-2 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap {% if l.key and active_page == l.key %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
+          <i class="fa-solid {{ l.icon }} {{ l.color }} text-[11px] hidden min-[1650px]:inline"></i>
+          {{ l.label }}
         </a>
+        {% endfor %}
 
-        <a href="/#map-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-map-location-dot text-[11px] text-[#078be5]"></i>
-          Xarita
-        </a>
-
-        <a href="/#video-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-circle-play text-[11px] text-rose-500"></i>
-          Video
-        </a>
-
-        <a href="/#analyses-section" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-flask text-[11px] text-[#18a65c]"></i>
-          Tahlillar
-        </a>
-
-        <a href="/#about" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-circle-info text-[11px]"></i>
-          Biz haqimizda
-        </a>
-
-        <a href="/#team" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-users text-[11px] text-indigo-500"></i>
-          Jamoamiz
-        </a>
-
-        <a href="/#contact" class="px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60 transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-address-book text-[11px]"></i>
-          Bog‘lanish
-        </a>
-
-        <a href="/analyze" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-sm transition-all flex items-center gap-1.5 ml-1">
+        <a href="/analyze" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#18a65c] hover:bg-[#11894a] shadow-sm transition-all flex items-center gap-1.5 mx-1 whitespace-nowrap">
           <i class="fa-solid fa-flask-vial text-xs"></i>
           Yangi Tahlil
         </a>
 
-        <a href="/monitoring" class="px-2.5 py-1.5 rounded-xl text-xs font-bold {% if active_page == 'monitoring' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-tower-broadcast text-[11px] text-[#18a65c]"></i>
-          Monitoring
+        {% for l in nav_links_after %}
+        <a href="{{ l.href }}" class="px-2 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap {% if active_page == l.key %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
+          <i class="fa-solid {{ l.icon }} {{ l.color }} text-[11px] hidden min-[1650px]:inline"></i>
+          {{ l.label }}
         </a>
-
-        <a href="/stats" class="px-2.5 py-1.5 rounded-xl text-xs font-bold {% if active_page == 'stats' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1">
-          <i class="fa-solid fa-chart-pie text-[11px]"></i>
-          Statistika
-        </a>
-
-        <a href="/history" class="px-3 py-2 rounded-xl text-sm font-semibold {% if active_page == 'history' %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors flex items-center gap-1.5">
-          <i class="fa-solid fa-clock-rotate-left text-xs"></i>
-          Tarix
-        </a>
+        {% endfor %}
 
         {% if current_user and current_user.role == 'admin' %}
-        <a href="/admin" class="px-3 py-2 rounded-xl text-sm font-bold {% if active_page == 'admin' %}text-purple-700 bg-purple-100{% else %}text-purple-600 hover:bg-purple-50{% endif %} transition-colors flex items-center gap-1.5 border border-purple-200">
-          <i class="fa-solid fa-shield-halved text-xs text-purple-600"></i>
+        <a href="/admin" class="px-2.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap {% if active_page == 'admin' %}text-purple-700 bg-purple-100{% else %}text-purple-600 hover:bg-purple-50{% endif %} transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-shield-halved text-[11px] text-purple-600"></i>
           Admin Panel
         </a>
         {% endif %}
       </div>
 
-      <!-- User Profile / Auth State -->
-      <div class="hidden md:flex items-center space-x-3">
+      <!-- Foydalanuvchi bloki (desktop) -->
+      <div class="hidden min-[1400px]:flex items-center space-x-3 shrink-0">
         {% if current_user %}
         <div class="flex items-center gap-3 pl-3 border-l border-slate-200">
           <a href="/profile" class="flex items-center gap-2 group p-1 rounded-xl hover:bg-sky-50/50 transition-colors">
@@ -118,19 +98,74 @@
         {% endif %}
       </div>
 
-      <!-- Mobile Top Bar Quick Badge -->
-      <div class="flex items-center gap-2 md:hidden">
+      <!-- Kichik ekran: profil/kirish + gamburger tugma (<1400px) -->
+      <div class="flex items-center gap-2 min-[1400px]:hidden">
         {% if current_user %}
-        <a href="/profile" class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#078be5] to-[#123c70] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+        <a href="/profile" class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#078be5] to-[#123c70] text-white flex items-center justify-center font-bold text-xs shadow-sm">
           {{ current_user.full_name[:1] if current_user.full_name else 'U' }}
         </a>
         {% else %}
-        <a href="/login" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#078be5] text-white shadow-sm">
+        <a href="/login" class="text-xs font-bold px-3 py-2 rounded-xl bg-[#078be5] text-white shadow-sm">
           Kirish
         </a>
         {% endif %}
+        <button type="button" id="navToggle" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="navMobile"
+          class="w-10 h-10 rounded-xl border border-slate-200 bg-white text-[#123c70] hover:bg-sky-50 flex items-center justify-center transition-colors">
+          <i id="navToggleIcon" class="fa-solid fa-bars text-base"></i>
+        </button>
       </div>
 
     </div>
   </div>
+
+  <!-- Mobil/planshet menyu paneli -->
+  <div id="navMobile" class="hidden min-[1400px]:hidden border-t border-[#e0edf7] bg-white/95 backdrop-blur-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
+    <div class="wide-container py-3 grid grid-cols-1 sm:grid-cols-2 gap-1">
+      {% for l in nav_links %}
+      <a href="{{ l.href }}" class="px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2.5 {% if l.key and active_page == l.key %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors">
+        <i class="fa-solid {{ l.icon }} {{ l.color }} w-4 text-center text-xs"></i>{{ l.label }}
+      </a>
+      {% endfor %}
+      <a href="/analyze" class="px-3 py-2.5 rounded-xl text-sm font-bold text-white bg-[#18a65c] hover:bg-[#11894a] flex items-center gap-2.5 transition-colors">
+        <i class="fa-solid fa-flask-vial w-4 text-center text-xs"></i>Yangi Tahlil
+      </a>
+      {% for l in nav_links_after %}
+      <a href="{{ l.href }}" class="px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2.5 {% if active_page == l.key %}text-[#078be5] bg-sky-50{% else %}text-[#183e70] hover:text-[#078be5] hover:bg-sky-50/60{% endif %} transition-colors">
+        <i class="fa-solid {{ l.icon }} {{ l.color }} w-4 text-center text-xs"></i>{{ l.label }}
+      </a>
+      {% endfor %}
+      {% if current_user and current_user.role == 'admin' %}
+      <a href="/admin" class="px-3 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2.5 {% if active_page == 'admin' %}text-purple-700 bg-purple-100{% else %}text-purple-600 hover:bg-purple-50{% endif %} transition-colors">
+        <i class="fa-solid fa-shield-halved w-4 text-center text-xs"></i>Admin Panel
+      </a>
+      {% endif %}
+      {% if current_user %}
+      <a href="/logout" class="px-3 py-2.5 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 transition-colors">
+        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-xs"></i>Chiqish
+      </a>
+      {% else %}
+      <a href="/register" class="px-3 py-2.5 rounded-xl text-sm font-bold text-[#078be5] hover:bg-sky-50 flex items-center gap-2.5 transition-colors">
+        <i class="fa-solid fa-user-plus w-4 text-center text-xs"></i>Ro‘yxatdan o‘tish
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById("navToggle");
+      var panel = document.getElementById("navMobile");
+      var icon = document.getElementById("navToggleIcon");
+      if (!btn || !panel) return;
+      function setOpen(open) {
+        panel.classList.toggle("hidden", !open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        icon.className = "fa-solid " + (open ? "fa-xmark" : "fa-bars") + " text-base";
+      }
+      btn.addEventListener("click", function () { setOpen(panel.classList.contains("hidden")); });
+      panel.addEventListener("click", function (e) { if (e.target.closest("a")) setOpen(false); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
+      window.addEventListener("resize", function () { if (window.innerWidth >= 1400) setOpen(false); });
+    })();
+  </script>
 </nav>
