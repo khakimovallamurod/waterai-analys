@@ -502,7 +502,8 @@ class PHW218Service:
     def _short_reason(self, err: Optional[str]) -> str:
         """Ulanish xatosiga qisqa, tushunarli izoh qo'shadi (tezkor tekshiruv, scan'siz)."""
         d = self.diagnose(deep=False)
-        return f"{err or 'Noma\'lum xato'}. {d['verdict']}"
+        reason = err or "Noma'lum xato"
+        return f"{reason}. {d['verdict']}"
 
     # ------------------------------------------------------------------ avto-ulanish
     def start_watcher(self):
