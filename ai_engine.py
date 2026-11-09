@@ -33,7 +33,7 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
             {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "⚠️ MAXSUS TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"}
         ]
         rec_text = (
-            f"Suv namunasi ({source_type}) <b>yaroqli</b> deb baholandi. "
+            f"Suv namunasi <b>yaroqli</b> deb baholandi. "
             "Tekshirilgan barcha asosiy parametrlar SanPiN va JSST belgilagan me’yoriy chegaralar doirasida. "
             "Ichimlik suvi sifatida bemalol foydalanish mumkin. Biroq bolalar yoki chaqaloqlar uchun qaynatib ichirish tavsiya etiladi."
         )
@@ -48,7 +48,7 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
         ]
         issues_str = ", ".join([f"{p['param']} ({p['val']})" for p in bad_params])
         rec_text = (
-            f"Suv namunasi ({source_type}) <b>shartli yaroqli</b> deb baholandi. "
+            f"Suv namunasi <b>shartli yaroqli</b> deb baholandi. "
             f"Quyidagi parametrlarda chetlashish aniqlandi: <b>{issues_str}</b>. "
             "Ichimlik va ovqatga ishlatishdan oldin ko'p bosqichli filtrlash (uglerodli filtr yoki teskari osmos) "
             "hamda qaynatish tavsiya qilinadi."
@@ -64,7 +64,7 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
         ]
         issues_str = ", ".join([f"{p['param']} ({p['val']})" for p in bad_params])
         rec_text = (
-            f"Suv namunasi ({source_type}) <b>yaroqsiz</b> deb baholandi! "
+            f"Suv namunasi <b>yaroqsiz</b> deb baholandi! "
             f"Bir nechta kritik ko‘rsatkichlar ({issues_str}) qat'iy me’yordan oshgan. "
             "Ushbu suvni to‘g‘ridan-to‘g‘ri iste’mol qilish sog‘liq uchun xavfli bo‘lishi mumkin. "
             "Faqat maxsus chuqur sanoat filtri yoki texnik maqsadlarda ishlatilishi lozim."

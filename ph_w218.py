@@ -9,8 +9,11 @@ Sozlamalar .env faylidan olinadi:
     TUYA_DEVICE_ID, TUYA_LOCAL_KEY, TUYA_DEVICE_IP, TUYA_VERSION (3.5), POLL_INTERVAL (2)
 """
 import csv
+import errno
+import ipaddress
 import logging
 import os
+import socket
 import threading
 import time
 import uuid
@@ -86,6 +89,94 @@ def _env_config() -> Dict[str, Any]:
         "version": float(get("TUYA_VERSION", "3.5")),
         "poll_interval": max(1.0, float(get("POLL_INTERVAL", "2"))),
     }
+
+
+
+TUYA_PORT = 6668
+AUTO_PROBE_SEC = 15       # avtomatik ulanish: ma'lum IP ni shuncha soniyada bir tekshirish
+AUTO_SCAN_SEC = 90        # avtomatik ulanish: tarmoqni qidirish (scan) oralig'i
+
+
+def _local_ip_for(target: str) -> Optional[str]:
+    """Operatsion tizim `target` ga yetish uchun qaysi o'z IP sini ishlatishini aniqlaydi (paket yuborilmaydi)."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(1)
+        s.connect((target, TUYA_PORT))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return None
+
+
+def _all_local_ips() -> List[str]:
+    ips: List[str] = []
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            ip = info[4][0]
+            if ip not in ips and not ip.startswith("127."):
+                ips.append(ip)
+    except Exception:
+        pass
+    return ips
+
+
+def _netmask_of(ip: Optional[str]) -> Optional[str]:
+    """psutil o'rnatilgan bo'lsa, shu IP ning haqiqiy tarmoq niqobini qaytaradi."""
+    if not ip:
+        return None
+    try:
+        import psutil  # ixtiyoriy
+        for addrs in psutil.net_if_addrs().values():
+            for a in addrs:
+                if a.family == socket.AF_INET and a.address == ip:
+                    return a.netmask
+    except Exception:
+        pass
+    return None
+
+
+def _same_network(local_ip: str, device_ip: str) -> Tuple[Optional[bool], str]:
+    """Server va qurilma bitta tarmoqdami? (natija, tushuntirish)."""
+    try:
+        mask = _netmask_of(local_ip)
+        if mask:
+            net = ipaddress.ip_network(f"{local_ip}/{mask}", strict=False)
+            return ipaddress.ip_address(device_ip) in net, f"{net}, niqob {mask}"
+        # Niqob noma'lum: faqat taxmin (aniq "yo'q" deb bo'lmaydi)
+        net = ipaddress.ip_network(f"{local_ip}/24", strict=False)
+        if ipaddress.ip_address(device_ip) in net:
+            return True, f"{net}, taxminiy"
+        return None, f"niqob aniqlanmadi, taxminan {net}"
+    except Exception:
+        return None, ""
+
+
+def _tcp_probe(ip: str, port: int = TUYA_PORT, timeout: float = 2.0) -> Tuple[str, str]:
+    """('open'|'refused'|'unreachable'|'timeout'|'error', xabar)"""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+    try:
+        code = s.connect_ex((ip, port))
+    except socket.timeout:
+        return "timeout", "javob kelmadi"
+    except Exception as e:
+        return "error", str(e)
+    finally:
+        s.close()
+    if code == 0:
+        return "open", "port ochiq"
+    refused = {errno.ECONNREFUSED, 10061}
+    unreachable = {errno.EHOSTUNREACH, errno.ENETUNREACH, errno.EHOSTDOWN, 10051, 10065}
+    timedout = {errno.ETIMEDOUT, errno.EAGAIN, 10060}
+    if code in refused:
+        return "refused", "qurilma javob berdi, lekin port yopiq"
+    if code in unreachable:
+        return "unreachable", "qurilmaga yo'l yo'q (tarmoqda ko'rinmayapti)"
+    if code in timedout:
+        return "timeout", "javob kelmadi (vaqt tugadi)"
+    return "error", f"xato kodi {code}"
 
 
 def parse_dps(dps: Dict[str, Any]) -> Dict[str, float]:
@@ -275,28 +366,192 @@ class PHW218Service:
         self.history: deque = deque(maxlen=MAX_HISTORY)
         self.recorder = DatasetRecorder()
         self._fails = 0
+        self._manual_off = False          # foydalanuvchi o'zi "Uzish" bosgan bo'lsa, avto-ulanish to'xtaydi
+        self._watch_thread: Optional[threading.Thread] = None
+        self._watch_stop = threading.Event()
+        self.auto_status = "off"          # off | waiting | scanning | connecting | connected
+        self.last_diag: Optional[Dict[str, Any]] = None
 
     # ------------------------------------------------------------------ helpers
     def is_configured(self) -> bool:
         c = self.config
-        return bool(c["device_id"] and c["local_key"] and c["ip"])
+        return bool(c["device_id"] and c["local_key"])
 
     def _make_device(self):
         c = self.config
+        # Ishlaydigan ph-w218-visualization loyihasidagi kabi: tinytuya standart
+        # taymaut va qayta urinishlari bilan (v3.5 sessiya kaliti kelishuvi sekinroq).
         dev = tinytuya.Device(
             dev_id=c["device_id"],
             address=c["ip"],
             local_key=c["local_key"],
             version=c["version"],
-            connection_timeout=3,
         )
         dev.set_socketPersistent(True)
-        try:
-            dev.set_socketRetryLimit(1)
-            dev.set_socketTimeout(3)
-        except AttributeError:
-            pass
         return dev
+
+    def _discover_ip(self) -> bool:
+        """Qurilma boshqa tarmoqda/IP o'zgargan bo'lsa, lokal tarmoqda uni ID bo'yicha qidiradi."""
+        try:
+            found = tinytuya.find_device(self.config["device_id"])
+        except Exception as e:  # pragma: no cover
+            logger.warning("PH-W218 qidirishda xato: %s", e)
+            return False
+        ip = (found or {}).get("ip")
+        if not ip:
+            return False
+        if ip != self.config["ip"]:
+            logger.info("PH-W218 yangi IP topildi: %s (oldin: %s)", ip, self.config["ip"])
+        self.config["ip"] = ip
+        ver = (found or {}).get("version")
+        try:
+            if ver:
+                self.config["version"] = float(ver)
+        except (TypeError, ValueError):
+            pass
+        return True
+
+    # ------------------------------------------------------------------ diagnostika
+    def diagnose(self, deep: bool = False) -> Dict[str, Any]:
+        """
+        Server va qurilma bitta tarmoqdami, qurilma ko'rinyaptimi, nima to'sqinlik qilyapti.
+        deep=True bo'lsa tarmoqda ID bo'yicha qidiruv (scan) ham bajariladi (~20 soniya).
+        """
+        cfg = self.config = _env_config()
+        checks: List[Dict[str, str]] = []
+
+        def add(title: str, status: str, detail: str):
+            checks.append({"title": title, "status": status, "detail": detail})  # status: ok | warn | fail | info
+
+        dev_ip = cfg["ip"]
+        local_ips = _all_local_ips()
+        route_ip = _local_ip_for(dev_ip) if dev_ip and dev_ip.lower() != "auto" else None
+        if route_ip and route_ip not in local_ips:
+            local_ips.insert(0, route_ip)
+        add("Server kompyuteri IP manzillari", "info", ", ".join(local_ips) or "aniqlanmadi")
+
+        if tinytuya is None:
+            add("tinytuya kutubxonasi", "fail", "o'rnatilmagan: pip install tinytuya")
+        if not cfg["device_id"] or not cfg["local_key"]:
+            add(".env sozlamalari", "fail", "TUYA_DEVICE_ID yoki TUYA_LOCAL_KEY yo'q")
+        else:
+            add(".env sozlamalari", "ok", f"qurilma ID va kalit bor, versiya {cfg['version']}")
+
+        verdict, level = "", "info"
+        reach = "unknown"
+        if dev_ip and dev_ip.lower() != "auto":
+            local = _local_ip_for(dev_ip)
+            if local:
+                same, note = _same_network(local, dev_ip)
+                if same is True:
+                    add("Bitta tarmoqmi?", "ok", f"Ha: server {local} va qurilma {dev_ip} bir tarmoqda ({note})")
+                elif same is False:
+                    add("Bitta tarmoqmi?", "fail", f"Yo'q: server {local}, qurilma {dev_ip} ({note}). Qurilma va kompyuter bitta Wi-Fi/routerda bo'lishi kerak")
+                else:
+                    add("Bitta tarmoqmi?", "warn", f"Server {local}, qurilma {dev_ip}: aniqlab bo'lmadi")
+            else:
+                add("Bitta tarmoqmi?", "fail", f"{dev_ip} manziliga yo'nalish topilmadi (kompyuter tarmoqqa ulanmagan bo'lishi mumkin)")
+            reach, msg = _tcp_probe(dev_ip)
+            st = {"open": "ok", "refused": "warn"}.get(reach, "fail")
+            add(f"Qurilma {dev_ip}:{TUYA_PORT}", st, msg)
+        else:
+            add("Qurilma IP si", "info", ".env da ko'rsatilmagan, avtomatik qidiriladi")
+
+        found = None
+        if deep and tinytuya is not None and cfg["device_id"]:
+            try:
+                found = tinytuya.find_device(cfg["device_id"])
+            except Exception as e:  # pragma: no cover
+                add("Tarmoq qidiruvi (scan)", "warn", f"xato: {e}")
+            if found and found.get("ip"):
+                add("Tarmoq qidiruvi (scan)", "ok", f"Qurilma topildi: {found['ip']} (versiya {found.get('version', '?')})")
+                if dev_ip and found["ip"] != dev_ip:
+                    add("IP o'zgargan", "warn", f".env da {dev_ip}, hozir {found['ip']}. Dastur yangi manzilga o'zi ulanadi")
+                reach = "found"
+            elif found is not None or not any(c["title"].startswith("Tarmoq qidiruvi") for c in checks):
+                add("Tarmoq qidiruvi (scan)", "fail", "Qurilma shu tarmoqda topilmadi (o'chiq yoki boshqa tarmoqda)")
+
+        with self._lock:
+            state, err = self.state, self.error
+        if state == "online":
+            verdict, level = "Qurilma ulangan va ma'lumot kelyapti.", "ok"
+        elif reach == "open":
+            verdict, level = ("Qurilma tarmoqda ko'rinyapti. Ulanmayotgan bo'lsa: Tuya qurilma bir vaqtda faqat BITTA lokal ulanishni qabul qiladi. "
+                              "Boshqa kompyuterdagi dastur (masalan ph-w218-visualization), telefondagi Tuya/Smart Life ilovasi yoki ikkinchi WaterAI nusxasi "
+                              "ulanib turgan bo'lsa, ularni yoping. Yana: kalit (TUYA_LOCAL_KEY) va versiya to'g'riligini tekshiring."), "warn"
+        elif reach == "refused":
+            verdict, level = "Qurilma tarmoqda bor, lekin 6668 port yopiq: boshqa dastur ulanishni band qilgan bo'lishi mumkin. Boshqa ulanishlarni yoping.", "warn"
+        elif reach == "found":
+            verdict, level = "Qurilma boshqa IP da topildi, ulanishga urinib ko'ring.", "warn"
+        elif reach in ("unreachable", "timeout"):
+            verdict, level = ("Qurilma ko'rinmayapti: u o'chiq, boshqa Wi-Fi'ga ulangan yoki IP manzili o'zgargan bo'lishi mumkin. "
+                              "Qurilmani yoqib, kompyuter bilan BIR tarmoqqa ulang."), "fail"
+        else:
+            verdict, level = "Qurilma tarmoqdan qidirilmoqda. Qurilmani yoqib, kompyuter bilan bir tarmoqqa ulang.", "warn"
+        if err and state != "online":
+            add("Oxirgi xato", "info", str(err))
+
+        result = {
+            "checked_at": datetime.now().isoformat(timespec="seconds"),
+            "level": level, "verdict": verdict, "checks": checks,
+            "server_ips": local_ips, "device_ip": dev_ip, "deep": deep,
+        }
+        self.last_diag = result
+        return result
+
+    def _short_reason(self, err: Optional[str]) -> str:
+        """Ulanish xatosiga qisqa, tushunarli izoh qo'shadi (tezkor tekshiruv, scan'siz)."""
+        d = self.diagnose(deep=False)
+        return f"{err or 'Noma\'lum xato'}. {d['verdict']}"
+
+    # ------------------------------------------------------------------ avto-ulanish
+    def start_watcher(self):
+        """Fon oqimi: qurilma paydo bo'lishi bilan o'zi ulanadi (foydalanuvchi "Uzish" bosmagan bo'lsa)."""
+        if os.getenv("AUTO_CONNECT", "1").strip().lower() in ("0", "false", "no", "off"):
+            self.auto_status = "off"
+            return
+        if self._watch_thread and self._watch_thread.is_alive():
+            return
+        self._watch_stop.clear()
+        self._watch_thread = threading.Thread(target=self._watch_loop, name="ph-w218-watcher", daemon=True)
+        self._watch_thread.start()
+
+    def stop_watcher(self):
+        self._watch_stop.set()
+        t = self._watch_thread
+        if t and t.is_alive():
+            t.join(timeout=3)
+        self._watch_thread = None
+        self.auto_status = "off"
+
+    def _watch_loop(self):
+        last_scan = 0.0
+        while not self._watch_stop.wait(AUTO_PROBE_SEC):
+            try:
+                if self._manual_off or self.state in ("online", "reconnecting", "connecting"):
+                    self.auto_status = "connected" if self.state in ("online", "reconnecting") else "waiting"
+                    continue
+                self.config = _env_config()
+                if not self.is_configured() or tinytuya is None:
+                    self.auto_status = "off"
+                    continue
+                self.auto_status = "waiting"
+                ip = self.config["ip"]
+                try_connect = False
+                if ip and ip.lower() != "auto":
+                    status, _ = _tcp_probe(ip, timeout=1.5)
+                    try_connect = status == "open"
+                if not try_connect and time.monotonic() - last_scan >= AUTO_SCAN_SEC:
+                    last_scan = time.monotonic()
+                    self.auto_status = "scanning"
+                    try_connect = self._discover_ip()
+                if try_connect:
+                    self.auto_status = "connecting"
+                    ok, msg = self.connect()
+                    logger.info("PH-W218 avto-ulanish: %s", msg)
+                    self.auto_status = "connected" if ok else "waiting"
+            except Exception as e:  # pragma: no cover
+                logger.warning("PH-W218 avto-ulanish xatosi: %s", e)
 
     def _close_device(self):
         if self._device is not None:
@@ -343,12 +598,27 @@ class PHW218Service:
                 return False, self.error
             self.state = "connecting"
             self.last_dps = {}
+            self._manual_off = False
 
-        try:
-            self._device = self._make_device()
-            values, err = self._read()
-        except Exception as e:
-            values, err = None, str(e)
+        values, err = None, None
+        if self.config["ip"] and self.config["ip"].lower() != "auto":
+            try:
+                self._device = self._make_device()
+                values, err = self._read()
+            except Exception as e:
+                values, err = None, str(e)
+
+        if values is None:
+            # IP noto'g'ri/o'zgargan yoki .env da yo'q: qurilmani tarmoqdan avtomatik qidiramiz
+            self._close_device()
+            if self._discover_ip():
+                try:
+                    self._device = self._make_device()
+                    values, err = self._read()
+                except Exception as e:
+                    values, err = None, str(e)
+            elif not err:
+                err = "Qurilma tarmoqda topilmadi"
 
         if values is None:
             self._close_device()
@@ -356,7 +626,7 @@ class PHW218Service:
                 self.state = "disconnected"
                 self.error = err
             logger.warning("PH-W218 ulanmadi: %s", err)
-            return False, err or "Noma'lum xato"
+            return False, self._short_reason(err)
 
         self._store(values)
         self._fails = 0
@@ -366,7 +636,9 @@ class PHW218Service:
         logger.info("PH-W218 ulandi (%s)", self.config["ip"])
         return True, "Qurilmaga muvaffaqiyatli ulandi"
 
-    def disconnect(self):
+    def disconnect(self, manual: bool = False):
+        if manual:
+            self._manual_off = True
         self._stop.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=10)
@@ -425,6 +697,8 @@ class PHW218Service:
                 "last_update": self.last_update,
                 "reading_valid": is_reading_valid(self.values) if self.values else False,
                 "device": {"name": DEVICE_NAME, "ip": self.config["ip"]},
+                "auto_connect": self.auto_status,
+                "manual_off": self._manual_off,
                 "values": values,
                 "recorder": self.recorder.snapshot(),
             }

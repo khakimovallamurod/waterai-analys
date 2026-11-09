@@ -51,13 +51,6 @@
       </div>
     </div>
 
-    <!-- WQI Badge -->
-    <div class="text-left sm:text-right">
-      <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Suv Sifati Indeksi (WQI)</div>
-      <div class="text-3xl font-black {% if analysis.status == 'valid' %}text-emerald-600{% elif analysis.status == 'conditional' %}text-amber-500{% else %}text-rose-600{% endif %}">
-        {{ "%.1f"|format(analysis.quality_score) }} <span class="text-sm font-bold text-slate-400">/ 100</span>
-      </div>
-    </div>
   </div>
 
   <!-- 1. ASOSIY NATIJA STATUS KARTASI -->

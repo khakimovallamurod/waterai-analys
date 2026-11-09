@@ -59,6 +59,17 @@ const Device = (() => {
     const live = s && (s.state === "online" || s.state === "reconnecting");
     btnOn.classList.toggle("hidden", !!live);
     btnOff.classList.toggle("hidden", !live);
+    const auto = $("devAuto");
+    if (auto) {
+      const map = {
+        waiting: "Avto-ulanish yoqilgan: qurilma tarmoqda paydo bo‘lishi bilan o‘zi ulanadi.",
+        scanning: "Avto-ulanish: tarmoqda qurilma qidirilmoqda…",
+        connecting: "Avto-ulanish: qurilma topildi, ulanmoqda…",
+      };
+      const txt = !live && s && !s.manual_off ? map[s.auto_connect] : "";
+      auto.innerText = txt || "";
+      auto.classList.toggle("hidden", !txt);
+    }
     btnOn.disabled = busy;
     btnOn.querySelector("span").innerText = busy ? "Ulanmoqda…" : "Qurilmaga ulanish";
   }
@@ -113,12 +124,40 @@ const Device = (() => {
     } else {
       showMessage(
         `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Ulanib bo‘lmadi: <b>${escapeHtml(data.message || "noma’lum xato")}</b>. ` +
-        "Qurilma yoqilganini va server bilan bir tarmoqda ekanini tekshiring. Hozircha standart qiymatlar ishlatiladi.",
+        "Hozircha standart qiymatlar ishlatiladi. Pastdagi “Tarmoq tekshiruvi” aniq sababni ko‘rsatadi.",
         "error"
       );
+      diagnose(false);
     }
     if (data.status) setStatus(data.status);
     else refresh();
+  }
+
+  async function diagnose(deep) {
+    const box = $("devDiag");
+    const btn = $("devDiagBtn");
+    if (!box) return;
+    box.classList.remove("hidden");
+    box.innerHTML = '<div class="text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Tarmoq tekshirilmoqda…' + (deep ? " (qidiruv ~20 soniya)" : "") + "</div>";
+    if (btn) btn.disabled = true;
+    const { ok, data } = await request("/api/device/diagnose" + (deep ? "?deep=true" : ""));
+    if (btn) btn.disabled = false;
+    if (!ok || !data.checks) {
+      box.innerHTML = '<div class="text-rose-600">Tekshiruv bajarilmadi: server bilan aloqa yo‘q.</div>';
+      return;
+    }
+    const icon = { ok: "fa-circle-check text-emerald-500", warn: "fa-triangle-exclamation text-amber-500", fail: "fa-circle-xmark text-rose-500", info: "fa-circle-info text-sky-500" };
+    const color = { ok: "text-emerald-700", warn: "text-amber-700", fail: "text-rose-700", info: "text-slate-600" };
+    const rows = data.checks.map((c) =>
+      `<div class="flex gap-2"><i class="fa-solid ${icon[c.status] || icon.info} mt-0.5"></i>` +
+      `<div><b class="text-slate-800">${escapeHtml(c.title)}:</b> <span class="${color[c.status] || ""}">${escapeHtml(c.detail)}</span></div></div>`
+    ).join("");
+    const vcol = { ok: "bg-emerald-50 text-emerald-800 border-emerald-200", warn: "bg-amber-50 text-amber-800 border-amber-200", fail: "bg-rose-50 text-rose-800 border-rose-200", info: "bg-sky-50 text-sky-800 border-sky-200" }[data.level] || "";
+    box.innerHTML = rows +
+      `<div class="mt-2 rounded-lg border px-3 py-2 font-semibold ${vcol}">${escapeHtml(data.verdict)}</div>` +
+      (deep ? "" : '<button type="button" id="devDeepBtn" class="mt-1 text-[11px] font-bold text-[#078be5] hover:underline">Tarmoqdan qurilmani qidirish (chuqur tekshiruv)</button>');
+    const deepBtn = $("devDeepBtn");
+    if (deepBtn) deepBtn.addEventListener("click", () => diagnose(true));
   }
 
   async function disconnect() {
@@ -143,6 +182,8 @@ const Device = (() => {
     const btnOff = $("devDisconnectBtn");
     if (btnOn) btnOn.addEventListener("click", connect);
     if (btnOff) btnOff.addEventListener("click", disconnect);
+    const btnDiag = $("devDiagBtn");
+    if (btnDiag) btnDiag.addEventListener("click", () => diagnose(false));
     refresh();
   }
 

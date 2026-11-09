@@ -76,7 +76,7 @@ def seed_initial_data(db: Session):
     if db.query(WaterAnalysis).count() == 0:
         samples = [
             {
-                "sample_name": "Toshkent shahri vodoprovod suvi",
+                "sample_name": "Samarqand shahri vodoprovod suvi",
                 "source_type": "Vodoprovod suvi",
                 "location": "Toshkent, Yunusobod tumani",
                 "data": {
@@ -190,8 +190,10 @@ async def lifespan(app: FastAPI):
         seed_initial_data(db)
     finally:
         db.close()
+    ph_service.start_watcher()   # qurilma tarmoqda paydo bo'lishi bilan o'zi ulanadi
     yield
     # Dastur to'xtaganda PH-W218 ulanishini yopish
+    ph_service.stop_watcher()
     ph_service.disconnect()
 
 
@@ -315,7 +317,7 @@ def handle_analyze(
     request: Request,
     sample_name: str = Form("Suv namunasi"),
     source_type: str = Form("Vodoprovod suvi"),
-    location: Optional[str] = Form("Toshkent"),
+    location: Optional[str] = Form("Samarqand"),
     temperature: float = Form(20.0),
     ph: float = Form(7.0),
     tds: float = Form(250.0),
@@ -1165,8 +1167,14 @@ def api_device_connect():
 
 @app.post("/api/device/disconnect")
 def api_device_disconnect():
-    ph_service.disconnect()
+    ph_service.disconnect(manual=True)
     return {"ok": True, "message": "Qurilma uzildi", "status": ph_service.snapshot()}
+
+
+@app.get("/api/device/diagnose")
+def api_device_diagnose(deep: bool = False):
+    """Server va qurilma bitta tarmoqdami, nega ulanmayotgani (deep=true: tarmoqdan qidirish ham)"""
+    return ph_service.diagnose(deep=deep)
 
 
 @app.get("/api/device/history")
@@ -1228,7 +1236,7 @@ def api_dataset_clear(request: Request, db: Session = Depends(get_db)):
 class AnalyzeRequest(BaseModel):
     sample_name: str = Field("Suv namunasi", description="Namuna nomi")
     source_type: str = Field("Vodoprovod suvi", description="Suv manbasi")
-    location: Optional[str] = Field("Toshkent", description="Hudud")
+    location: Optional[str] = Field("Samarqand", description="Hudud")
     ph: float = Field(7.0, ge=0, le=14, description="pH ko'rsatkichi")
     tds: float = Field(250.0, ge=0, description="TDS (mg/L)")
     turbidity: float = Field(1.0, ge=0, description="Loyqalik (NTU)")

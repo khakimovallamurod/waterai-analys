@@ -6,7 +6,7 @@
 const PRESETS = {
   vodoprovod: {
     source_type: "Vodoprovod suvi",
-    sample_name: "Toshkent shahri vodoprovod suvi",
+    sample_name: "Samarqand shahri vodoprovod suvi",
     temperature: 19.5,
     ph: 7.20,
     tds: 240,
