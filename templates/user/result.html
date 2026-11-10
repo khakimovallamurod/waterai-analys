@@ -55,9 +55,6 @@
 
   <!-- 1. ASOSIY NATIJA STATUS KARTASI -->
   <div class="p-8 rounded-3xl border-2 text-center transition-all {% if analysis.status == 'valid' %}bg-emerald-50/80 border-emerald-300 text-emerald-950{% elif analysis.status == 'conditional' %}bg-amber-50/80 border-amber-300 text-amber-950{% else %}bg-rose-50/80 border-rose-300 text-rose-950{% endif %} shadow-sm">
-    <div class="text-5xl mb-3">
-      {% if analysis.status == 'valid' %}🟢{% elif analysis.status == 'conditional' %}🟡{% else %}🔴{% endif %}
-    </div>
     <h2 class="text-3xl font-black tracking-tight mb-2 {% if analysis.status == 'valid' %}text-emerald-700{% elif analysis.status == 'conditional' %}text-amber-700{% else %}text-rose-700{% endif %}">
       {{ analysis.status_label }}
     </h2>
@@ -67,85 +64,12 @@
 
     <div class="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-current shadow-sm text-xs font-bold">
       <i class="fa-solid fa-microchip"></i>
-      <span>AI ishonchliligi: <b>{{ "%.1f"|format(analysis.confidence) }}%</b></span>
+      <span>Aniqligi: <b>{{ "%.1f"|format(analysis.confidence) }}%</b></span>
     </div>
-  </div>
-
-  <!-- 2. 3 TA KLASS KARTALARI -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    
-    <div class="glass-card p-5 rounded-2xl border {% if analysis.status == 'valid' %}border-emerald-300 bg-emerald-50/40 ring-2 ring-emerald-400{% else %}border-slate-100{% endif %} text-center">
-      <div class="text-2xl mb-1">🟢</div>
-      <div class="text-sm font-bold text-slate-800">Yaroqli</div>
-      <div class="text-2xl font-black text-emerald-600 mt-1">
-        {{ "%.1f"|format(analysis.prob_valid) }}%
-      </div>
-      <div class="text-[11px] text-slate-400 mt-1">To‘liq xavfsiz</div>
-    </div>
-
-    <div class="glass-card p-5 rounded-2xl border {% if analysis.status == 'conditional' %}border-amber-300 bg-amber-50/40 ring-2 ring-amber-400{% else %}border-slate-100{% endif %} text-center">
-      <div class="text-2xl mb-1">🟡</div>
-      <div class="text-sm font-bold text-slate-800">Shartli yaroqli</div>
-      <div class="text-2xl font-black text-amber-500 mt-1">
-        {{ "%.1f"|format(analysis.prob_conditional) }}%
-      </div>
-      <div class="text-[11px] text-slate-400 mt-1">Filtrlash talab qilinadi</div>
-    </div>
-
-    <div class="glass-card p-5 rounded-2xl border {% if analysis.status == 'invalid' %}border-rose-300 bg-rose-50/40 ring-2 ring-rose-400{% else %}border-slate-100{% endif %} text-center">
-      <div class="text-2xl mb-1">🔴</div>
-      <div class="text-sm font-bold text-slate-800">Yaroqsiz</div>
-      <div class="text-2xl font-black text-rose-600 mt-1">
-        {{ "%.1f"|format(analysis.prob_invalid) }}%
-      </div>
-      <div class="text-[11px] text-slate-400 mt-1">Iste’molga yaroqsiz</div>
-    </div>
-
   </div>
 
   <!-- 3. EHTIMOLLIK PROGRESS BOWLARI & AI TAVSIYASI -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    
-    <!-- Ehtimolliklar -->
-    <div class="glass-panel p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-      <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-        <i class="fa-solid fa-chart-column text-sky-500"></i>
-        Suv sifati klasslari ehtimolligi
-      </h3>
-
-      <div class="space-y-3 pt-2">
-        <div>
-          <div class="flex justify-between text-xs font-bold mb-1">
-            <span class="text-slate-700">🟢 Yaroqli</span>
-            <span class="text-emerald-600">{{ "%.1f"|format(analysis.prob_valid) }}%</span>
-          </div>
-          <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-            <div class="bg-emerald-500 h-full rounded-full transition-all duration-700" style="width: {{ analysis.prob_valid }}%"></div>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex justify-between text-xs font-bold mb-1">
-            <span class="text-slate-700">🟡 Shartli yaroqli</span>
-            <span class="text-amber-600">{{ "%.1f"|format(analysis.prob_conditional) }}%</span>
-          </div>
-          <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-            <div class="bg-amber-400 h-full rounded-full transition-all duration-700" style="width: {{ analysis.prob_conditional }}%"></div>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex justify-between text-xs font-bold mb-1">
-            <span class="text-slate-700">🔴 Yaroqsiz</span>
-            <span class="text-rose-600">{{ "%.1f"|format(analysis.prob_invalid) }}%</span>
-          </div>
-          <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-            <div class="bg-rose-500 h-full rounded-full transition-all duration-700" style="width: {{ analysis.prob_invalid }}%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  <div class="grid grid-cols-1 gap-6">
     <!-- AI Xulosasi -->
     <div class="glass-panel p-6 rounded-3xl border border-sky-100 shadow-sm space-y-3 bg-gradient-to-br from-sky-50/50 to-white">
       <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -170,7 +94,6 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {% for u in usage_recommendations %}
       <div class="p-4 rounded-2xl border {{ u.badge_class }} flex flex-col items-center text-center justify-between space-y-2">
-        <div class="text-3xl">{{ u.icon }}</div>
         <div class="text-xs font-bold text-slate-800">{{ u.title }}</div>
         <div class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border bg-white/70">
           {{ u.status }}

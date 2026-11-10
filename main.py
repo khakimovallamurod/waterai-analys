@@ -1171,6 +1171,19 @@ def api_device_disconnect():
     return {"ok": True, "message": "Qurilma uzildi", "status": ph_service.snapshot()}
 
 
+@app.get("/api/device/preview")
+def api_device_preview(
+    ph: float = 7.0, tds: float = 0.0, ec: float = 0.0,
+    salinity: float = 0.0, orp: float = 0.0, temperature: float = 20.0,
+):
+    """Qurilma qiymatlari bo'yicha suv holatini bazaga saqlamasdan hisoblaydi (jonli ko'rsatish uchun)"""
+    r = ai_engine.analyze_water_sample({
+        "ph": ph, "tds": tds, "ec": ec, "salinity": salinity, "orp": orp,
+        "temperature": temperature, "data_source": "device",
+    })
+    return {k: r.get(k) for k in ("status", "status_label", "status_text", "confidence", "bad_parameters_count")}
+
+
 @app.get("/api/device/diagnose")
 def api_device_diagnose(deep: bool = False):
     """Server va qurilma bitta tarmoqdami, nega ulanmayotgani (deep=true: tarmoqdan qidirish ham)"""

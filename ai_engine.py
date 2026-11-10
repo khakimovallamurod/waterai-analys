@@ -25,12 +25,12 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
     """Holat bo'yicha foydalanish yo'nalishlari va AI tavsiya matni."""
     if status == "valid":
         usage_recommendations = [
-            {"icon": "🚰", "title": "Ichimlik", "status": "🟢 TAVSIYA ETILADI", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🍳", "title": "Ovqat tayyorlash", "status": "🟢 TAVSIYA ETILADI", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🧺", "title": "Kir yuvish", "status": "🟢 MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "🟢 MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🌱", "title": "Sug‘orish", "status": "⚠️ QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "⚠️ MAXSUS TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"}
+            {"icon": "🚰", "title": "Ichimlik", "status": "TAVSIYA ETILADI", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🍳", "title": "Ovqat tayyorlash", "status": "TAVSIYA ETILADI", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🧺", "title": "Kir yuvish", "status": "MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🌱", "title": "Sug‘orish", "status": "QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "MAXSUS TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"}
         ]
         rec_text = (
             f"Suv namunasi <b>yaroqli</b> deb baholandi. "
@@ -39,12 +39,12 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
         )
     elif status == "conditional":
         usage_recommendations = [
-            {"icon": "🚰", "title": "Ichimlik", "status": "🟡 FILTRLASHDAN KEYIN", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🍳", "title": "Ovqat tayyorlash", "status": "🟡 TOZALASHDAN KEYIN", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🧺", "title": "Kir yuvish", "status": "🟢 MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "🟢 SHARTLI MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
-            {"icon": "🌱", "title": "Sug‘orish", "status": "⚠️ QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "⚠️ MAXSUS TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"}
+            {"icon": "🚰", "title": "Ichimlik", "status": "FILTRLASHDAN KEYIN", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🍳", "title": "Ovqat tayyorlash", "status": "TOZALASHDAN KEYIN", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🧺", "title": "Kir yuvish", "status": "MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "SHARTLI MOS", "badge_class": "bg-emerald-100 text-emerald-800 border-emerald-300"},
+            {"icon": "🌱", "title": "Sug‘orish", "status": "QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "MAXSUS TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"}
         ]
         issues_str = ", ".join([f"{p['param']} ({p['val']})" for p in bad_params])
         rec_text = (
@@ -57,9 +57,9 @@ def _usage_and_recommendation(status: str, source_type: str, bad_params: List[Di
         usage_recommendations = [
             {"icon": "🚰", "title": "Ichimlik", "status": "🔴 TAVSIYA ETILMAYDI", "badge_class": "bg-rose-100 text-rose-800 border-rose-300"},
             {"icon": "🍳", "title": "Ovqat tayyorlash", "status": "🔴 TAVSIYA ETILMAYDI", "badge_class": "bg-rose-100 text-rose-800 border-rose-300"},
-            {"icon": "🧺", "title": "Kir yuvish", "status": "🟡 SHARTLI MOS", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "🟡 SHARTLI MOS", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
-            {"icon": "🌱", "title": "Sug‘orish", "status": "⚠️ QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🧺", "title": "Kir yuvish", "status": "SHARTLI MOS", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🚿", "title": "Maishiy foydalanish", "status": "SHARTLI MOS", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
+            {"icon": "🌱", "title": "Sug‘orish", "status": "QO‘SHIMCHA TEKSHIRUV", "badge_class": "bg-amber-100 text-amber-800 border-amber-300"},
             {"icon": "🧒", "title": "3 yoshgacha bolalar", "status": "🔴 TAVSIYA ETILMAYDI", "badge_class": "bg-rose-100 text-rose-800 border-rose-300"}
         ]
         issues_str = ", ".join([f"{p['param']} ({p['val']})" for p in bad_params])
@@ -159,7 +159,7 @@ def analyze_water_sample(data: Dict[str, Any]) -> Dict[str, Any]:
         prob_conditional = 4.1
         prob_invalid = 1.2
         status = "valid"
-        status_label = "🟢 Yaroqli"
+        status_label = "Yaroqli"
         status_text = "Suv ichimlik sifatida foydalanishga mos. Barcha ko‘rsatkichlar me’yorda."
         quality_score = 95.0
         confidence = 94.7
@@ -168,7 +168,7 @@ def analyze_water_sample(data: Dict[str, Any]) -> Dict[str, Any]:
         prob_conditional = 72.3
         prob_invalid = 9.2
         status = "conditional"
-        status_label = "🟡 Shartli yaroqli"
+        status_label = "Shartli yaroqli"
         status_text = "Ayrim parametrlar bo‘yicha muammo mavjud. Qo‘shimcha tozalash yoki filtrlash tavsiya etiladi."
         quality_score = 68.5
         confidence = 72.3
@@ -302,12 +302,12 @@ def analyze_device_sample(data: Dict[str, Any]) -> Dict[str, Any]:
         prob_valid, prob_conditional, prob_invalid = 3.4, 16.8, 79.8
         quality_score = max(5.0, min(45.0, 100 - penalty))
     elif bad_count >= 1:
-        status, status_label = "conditional", "🟡 Shartli yaroqli"
+        status, status_label = "conditional", "Shartli yaroqli"
         status_text = "Ayrim parametrlar bo‘yicha muammo mavjud. Qo‘shimcha tozalash yoki filtrlash tavsiya etiladi."
         prob_valid, prob_conditional, prob_invalid = 18.5, 72.3, 9.2
         quality_score = max(46.0, min(79.0, 100 - penalty))
     else:
-        status, status_label = "valid", "🟢 Yaroqli"
+        status, status_label = "valid", "Yaroqli"
         status_text = "Suv ichimlik sifatida foydalanishga mos. Qurilma o‘lchagan barcha ko‘rsatkichlar me’yorda."
         prob_valid, prob_conditional, prob_invalid = 94.7, 4.1, 1.2
         quality_score = max(80.0, min(98.0, 98 - penalty))

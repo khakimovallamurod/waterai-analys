@@ -52,16 +52,57 @@ function restoreDefaults() {
   refreshBadges();
 }
 
+const LIVE_STYLE = {
+  valid: "bg-emerald-50 border-emerald-300 text-emerald-800",
+  conditional: "bg-amber-50 border-amber-300 text-amber-800",
+  invalid: "bg-rose-50 border-rose-300 text-rose-800",
+};
+let lastPreviewKey = "";
+let previewTimer = null;
+
+function hideLiveStatus() {
+  lastPreviewKey = "";
+  document.getElementById("devLiveStatus").classList.add("hidden");
+}
+
+function requestPreview() {
+  const q = new URLSearchParams();
+  valueInputs().forEach((input) => {
+    const v = parseFloat(input.value);
+    if (!isNaN(v) && DEVICE_NORMS[keyOf(input)]) q.set(keyOf(input), v);
+  });
+  const key = q.toString();
+  if (!key || key === lastPreviewKey) return;
+  lastPreviewKey = key;
+  fetch("/api/device/preview?" + key)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => {
+      if (!r || !liveMode) return;
+      const box = document.getElementById("devLiveStatus");
+      box.className = "rounded-2xl border-2 px-5 py-4 text-center " + (LIVE_STYLE[r.status] || LIVE_STYLE.invalid);
+      document.getElementById("devLiveLabel").innerText = r.status_label;
+      document.getElementById("devLiveText").innerText = r.status_text || "";
+      document.getElementById("devLiveAcc").innerText = Number(r.confidence).toFixed(1) + "%";
+    })
+    .catch(() => { lastPreviewKey = ""; });
+}
+
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(requestPreview, 300);
+}
+
 function setLiveMode(on, s) {
   if (liveMode === on) return;
   liveMode = on;
+  if (!on) hideLiveStatus();
 
   valueInputs().forEach((input) => { input.readOnly = on; });
   document.getElementById("data_source_input").value = on ? "device" : "device_default";
   document.getElementById("resetDefaultsBtn").classList.toggle("hidden", on);
   document.getElementById("submitLabel").innerHTML = on
-    ? "📡 &nbsp; Qurilmaning real qiymatlari bilan tahlil qilish"
-    : "🔍 &nbsp; Standart qiymatlar bilan tahlil qilish";
+    ? "Qurilmaning real qiymatlari bilan tahlil qilish"
+    : "Standart qiymatlar bilan tahlil qilish";
 
   if (!on) {
     restoreDefaults();
@@ -80,6 +121,7 @@ function applyLiveValues(s) {
     if (input) input.value = Device.fmt(item.value, DEVICE_DECIMALS[key] || 0);
   });
   refreshBadges();
+  schedulePreview();
 
   const note = document.getElementById("valuesSourceNote");
   const time = new Date(s.last_update).toLocaleTimeString();

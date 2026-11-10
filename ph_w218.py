@@ -621,6 +621,27 @@ class PHW218Service:
             elif not err:
                 err = "Qurilma tarmoqda topilmadi"
 
+        if values is None and err and ("key or version" in err or "914" in err):
+            # Port ochiq, lekin kalit/versiya mos kelmadi: boshqa protokol versiyalarini sinaymiz
+            orig = self.config["version"]
+            for ver in (3.5, 3.4, 3.3, 3.2, 3.1):
+                if ver == orig:
+                    continue
+                self._close_device()
+                self.config["version"] = ver
+                try:
+                    self._device = self._make_device()
+                    values, _ = self._read()
+                except Exception:
+                    values = None
+                if values is not None:
+                    logger.info("PH-W218 versiya %s bilan ulandi (.env da %s edi)", ver, orig)
+                    err = None
+                    break
+            else:
+                self.config["version"] = orig
+                err = f"{err} (versiyalar 3.1-3.5 sinab ko'rildi: TUYA_LOCAL_KEY noto'g'ri yoki eskirgan)"
+
         if values is None:
             self._close_device()
             with self._lock:

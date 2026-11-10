@@ -52,6 +52,13 @@
     </div>
 
     <!-- Manba holati -->
+    <div id="devLiveStatus" class="hidden rounded-2xl border-2 px-5 py-4 text-center">
+      <div class="text-xs font-bold uppercase tracking-wider opacity-70">Suv holati (jonli)</div>
+      <div id="devLiveLabel" class="text-2xl font-black mt-1">—</div>
+      <div id="devLiveText" class="text-sm font-medium mt-1 opacity-90"></div>
+      <div class="text-xs font-bold mt-2">Aniqligi: <span id="devLiveAcc">—</span></div>
+    </div>
+
     <div id="valuesSourceNote" class="text-xs font-medium rounded-xl px-3 py-2 border bg-amber-50 text-amber-700 border-amber-200">
       <i class="fa-solid fa-circle-exclamation mr-1"></i>
       Qurilma ulanmagan — qurilma parametrlarining <b>standart qiymatlari</b> ko‘rsatilmoqda. Ularni qo‘lda o‘zgartirishingiz mumkin.
@@ -78,7 +85,6 @@
       {% for c in device_cards %}
       <div class="glass-card p-5 rounded-2xl border border-slate-100 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-xl">{{ c.icon }}</span>
           <div class="min-w-0">
             <div class="text-sm font-bold text-slate-800 truncate">{{ c.name }}</div>
             <div class="text-[11px] text-slate-400">{{ c.norm }}</div>
@@ -119,7 +125,7 @@
       class="w-full sm:w-auto px-12 py-4 rounded-2xl text-white font-extrabold text-base bg-[#18a65c] hover:bg-[#11894a] shadow-xl shadow-emerald-200/80 transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-3 mx-auto pulse-glow"
     >
       <i class="fa-solid fa-magnifying-glass-chart text-lg"></i>
-      <span id="submitLabel">🔍 &nbsp; Standart qiymatlar bilan tahlil qilish</span>
+      <span id="submitLabel">Standart qiymatlar bilan tahlil qilish</span>
     </button>
     <p class="text-xs text-[#647991] mt-2 font-medium">
       AI modeli PH-W218 parametrlari bo‘yicha SanPiN 0211-06 va JSST standartlari asosida hisobot beradi
