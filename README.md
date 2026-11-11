@@ -6,7 +6,7 @@ Ushbu platforma O‘zbekiston davlat standartlari (**SanPiN 0211-06**) hamda **J
 
 ## 🌟 Asosiy Imkoniyatlar
 
-1. **AI Suv Sifati Indeksi (WQI) va Klassifikatsiya**:
+1. **AI Suv Sifati Klassifikatsiyasi**:
    - 10+ ta fizik-kimyoviy parametrlar (pH, TDS, Turbidlik, Qattiqlik, Sulfatlar, Xloraminlar, Organik moddalar, Trihalometanlar, Harorat, EC).
    - Suvning 3 ta toifaga bo'linishi: 🟢 **Yaroqli**, 🟡 **Shartli yaroqli**, 🔴 **Yaroqsiz**.
    - Har bir toifa bo'yicha sun'iy intellektning ishonchlilik ehtimolligi (`confidence %`).
@@ -92,7 +92,7 @@ Xavfsizlik talablariga ko'ra, **parollar va hisob ma'lumotlari manba kodida (sou
 ```
 waterai-analys/
 ├── main.py              # FastAPI serveri, barcha marshrutlar va biznes mantiqi
-├── ai_engine.py         # WQI hisoblash, SanPiN me'yorlari va AI tavsiyalar dvigateli
+├── ai_engine.py         # Sifat hisoblash, SanPiN me'yorlari va AI tavsiyalar dvigateli
 ├── auth.py              # JWT tokenlar, parol xeshlash, telefon maskasi
 ├── database.py          # SQLite va SQLAlchemy konfiguratsiyasi
 ├── models.py            # User, WaterAnalysis, ParameterNorm jadvallari

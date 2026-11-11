@@ -44,7 +44,7 @@
           <th class="py-3 px-4">Manba</th>
           <th class="py-3 px-4">pH</th>
           <th class="py-3 px-4">TDS</th>
-          <th class="py-3 px-4">WQI</th>
+          <th class="py-3 px-4">Aniqligi</th>
           <th class="py-3 px-4">AI Xulosasi</th>
           <th class="py-3 px-4 text-center no-print">Ko'rish</th>
           <th class="py-3 px-4 text-center no-print">O'chirish</th>
@@ -69,20 +69,20 @@
             <td class="py-3 px-4 font-mono">{{ "%.2f"|format(a.ph) }}</td>
             <td class="py-3 px-4 font-mono">{{ "%.0f"|format(a.tds) }} mg/L</td>
             <td class="py-3 px-4 font-mono font-bold {% if a.status == 'valid' %}text-emerald-600{% elif a.status == 'conditional' %}text-amber-600{% else %}text-rose-600{% endif %}">
-              {{ "%.1f"|format(a.quality_score) }}
+              {{ "%.1f"|format(a.confidence) }}%
             </td>
             <td class="py-3 px-4">
               {% if a.status == 'valid' %}
               <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                🟢 Yaroqli
+                Good
               </span>
               {% elif a.status == 'conditional' %}
               <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                🟡 Shartli
+                Moderate
               </span>
               {% else %}
               <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                🔴 Yaroqsiz
+                Poor
               </span>
               {% endif %}
             </td>

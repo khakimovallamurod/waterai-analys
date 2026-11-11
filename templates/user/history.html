@@ -92,15 +92,15 @@
             <td class="py-3.5 px-5">
               {% if a.status == 'valid' %}
               <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                🟢 Yaroqli
+                Good
               </span>
               {% elif a.status == 'conditional' %}
               <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
-                🟡 Shartli yaroqli
+                Moderate
               </span>
               {% else %}
               <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                🔴 Yaroqsiz
+                Poor
               </span>
               {% endif %}
             </td>
@@ -131,15 +131,15 @@
           </span>
           {% if a.status == 'valid' %}
           <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
-            🟢 Yaroqli
+            Good
           </span>
           {% elif a.status == 'conditional' %}
           <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700">
-            🟡 Shartli
+            Moderate
           </span>
           {% else %}
           <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">
-            🔴 Yaroqsiz
+            Poor
           </span>
           {% endif %}
         </div>

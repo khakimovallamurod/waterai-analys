@@ -489,7 +489,7 @@ def export_single_csv(analysis_id: int, db: Session = Depends(get_db)):
     writer.writerow(["Manba turi", analysis.source_type, "", ""])
     writer.writerow(["Hudud", analysis.location or "", "", ""])
     writer.writerow(["Sana", analysis.created_at.strftime("%d.%m.%Y %H:%M"), "", ""])
-    writer.writerow(["WQI Indeksi", f"{analysis.quality_score:.1f}", "100", ""])
+    writer.writerow(["Aniqligi", f"{analysis.confidence:.1f}%", "", ""])
     writer.writerow(["Umumiy Baho", analysis.status_label, "", ""])
     writer.writerow([])
     if (analysis.data_source or "").startswith("device"):
@@ -544,7 +544,7 @@ def export_all_history_csv(db: Session = Depends(get_db)):
 
     writer.writerow([
         "ID", "Namuna nomi", "Manba turi", "Hudud", "pH", "TDS (mg/L)",
-        "Turbidlik (NTU)", "Qattiqlik (mg/L)", "Sulfatlar (mg/L)", "WQI Indeks",
+        "Turbidlik (NTU)", "Qattiqlik (mg/L)", "Sulfatlar (mg/L)", "Aniqligi",
         "Holat", "Sana"
     ])
 
@@ -552,7 +552,7 @@ def export_all_history_csv(db: Session = Depends(get_db)):
         writer.writerow([
             a.id, a.sample_name, a.source_type, a.location or "",
             f"{a.ph:.2f}", f"{a.tds:.0f}", f"{a.turbidity:.1f}", f"{a.hardness:.0f}",
-            f"{a.sulfate:.0f}", f"{a.quality_score:.1f}", a.status_label,
+            f"{a.sulfate:.0f}", f"{a.confidence:.1f}%", a.status_label,
             a.created_at.strftime("%d.%m.%Y %H:%M") if a.created_at else ""
         ])
 
@@ -581,7 +581,7 @@ def stats_page(request: Request, db: Session = Depends(get_db)):
         if s not in source_map:
             source_map[s] = {"count": 0, "scores": []}
         source_map[s]["count"] += 1
-        source_map[s]["scores"].append(a.quality_score)
+        source_map[s]["scores"].append(a.confidence)
 
     icon_map = {
         "Vodoprovod suvi": "🚰",
@@ -806,7 +806,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     conditional_count = sum(1 for a in analyses if a.status == "conditional")
     invalid_count = sum(1 for a in analyses if a.status == "invalid")
     total_count = len(analyses)
-    avg_wqi = (sum(a.quality_score for a in analyses) / total_count) if total_count > 0 else 0.0
+    avg_confidence = (sum(a.confidence for a in analyses) / total_count) if total_count > 0 else 0.0
 
     norms = db.query(ParameterNorm).all()
     water_sources = db.query(WaterSource).order_by(WaterSource.id.asc()).all()
@@ -820,7 +820,7 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         "valid_count": valid_count,
         "conditional_count": conditional_count,
         "invalid_count": invalid_count,
-        "avg_wqi": avg_wqi,
+        "avg_confidence": avg_confidence,
         "norms": norms,
         "water_sources": water_sources
     })
@@ -839,7 +839,7 @@ def admin_analyses_page(request: Request, db: Session = Depends(get_db)):
     conditional_count = sum(1 for a in analyses if a.status == "conditional")
     invalid_count = sum(1 for a in analyses if a.status == "invalid")
     total_count = len(analyses)
-    avg_wqi = (sum(a.quality_score for a in analyses) / total_count) if total_count > 0 else 0.0
+    avg_confidence = (sum(a.confidence for a in analyses) / total_count) if total_count > 0 else 0.0
 
     ctx = get_base_context(request, active_page="admin", current_user=current_user)
     ctx.update({
@@ -849,7 +849,7 @@ def admin_analyses_page(request: Request, db: Session = Depends(get_db)):
         "valid_count": valid_count,
         "conditional_count": conditional_count,
         "invalid_count": invalid_count,
-        "avg_wqi": avg_wqi
+        "avg_confidence": avg_confidence
     })
     return templates.TemplateResponse(request=request, name="admin/analyses.html", context=ctx)
 

@@ -11,17 +11,17 @@
        ========================================================================= -->
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
     
-    <!-- Karta 1: O'rtacha WQI -->
+    <!-- Karta 1: O'rtacha aniqlik -->
     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
       <div class="flex items-center justify-between">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">O'rtacha WQI Indeksi</span>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">O'rtacha aniqlik</span>
         <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
           <i class="fa-solid fa-scale-balanced"></i>
         </div>
       </div>
       <div class="mt-3">
         <div class="text-2xl sm:text-3xl font-black text-slate-800">
-          {{ "%.1f"|format(avg_wqi) if avg_wqi is defined else "0.0" }} <span class="text-sm font-bold text-slate-400">/ 100</span>
+          {{ "%.1f"|format(avg_confidence) if avg_confidence is defined else "0.0" }}<span class="text-sm font-bold text-slate-400">%</span>
         </div>
         <div class="mt-1 text-xs text-slate-500">
           Laboratoriya o'rtacha sifati
@@ -140,7 +140,7 @@
               <th class="py-2.5 px-3">№</th>
               <th class="py-2.5 px-3">Namuna nomi</th>
               <th class="py-2.5 px-3">Manba</th>
-              <th class="py-2.5 px-3">WQI</th>
+              <th class="py-2.5 px-3">Aniqligi</th>
               <th class="py-2.5 px-3">AI Xulosasi</th>
               <th class="py-2.5 px-3">Sana</th>
             </tr>
@@ -152,15 +152,15 @@
               <td class="py-2.5 px-3 font-bold text-slate-800">{{ a.sample_name }}</td>
               <td class="py-2.5 px-3 text-slate-600">{{ a.source_type }}</td>
               <td class="py-2.5 px-3 font-mono font-bold {% if a.status == 'valid' %}text-emerald-600{% elif a.status == 'conditional' %}text-amber-600{% else %}text-rose-600{% endif %}">
-                {{ "%.1f"|format(a.quality_score) }}
+                {{ "%.1f"|format(a.confidence) }}%
               </td>
               <td class="py-2.5 px-3">
                 {% if a.status == 'valid' %}
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">🟢 Yaroqli</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Good</span>
                 {% elif a.status == 'conditional' %}
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">🟡 Shartli</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">Moderate</span>
                 {% else %}
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">🔴 Yaroqsiz</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">Poor</span>
                 {% endif %}
               </td>
               <td class="py-2.5 px-3 text-slate-400">

@@ -262,7 +262,7 @@
         </div>
         <div class="p-3.5 rounded-2xl bg-[#f5fbff] border border-[#e0edf7] text-center">
           <div class="text-xs text-[#61748a] font-semibold">Sun'iy Intellekt Modeli</div>
-          <div class="text-xl font-black text-[#123c70] mt-0.5">WQI + Neyron Tarmoq</div>
+          <div class="text-xl font-black text-[#123c70] mt-0.5">Neyron Tarmoq</div>
         </div>
       </div>
 
@@ -361,7 +361,7 @@
               <th class="py-3.5 px-5">pH</th>
               <th class="py-3.5 px-5">TDS</th>
               <th class="py-3.5 px-5">Turbidlik</th>
-              <th class="py-3.5 px-5">WQI Indeksi</th>
+              <th class="py-3.5 px-5">Aniqligi</th>
               <th class="py-3.5 px-5">AI Bahosi</th>
               <th class="py-3.5 px-5">Sana</th>
               <th class="py-3.5 px-5 text-right">Amal</th>
@@ -386,20 +386,20 @@
               <td class="py-3.5 px-5 font-mono text-xs text-[#12345b]">{{ "%.0f"|format(a.tds) }} mg/L</td>
               <td class="py-3.5 px-5 font-mono text-xs text-[#12345b]">{{ "%.1f"|format(a.turbidity) }} NTU</td>
               <td class="py-3.5 px-5 font-mono text-xs font-extrabold {% if a.status == 'valid' %}text-[#18a65c]{% elif a.status == 'conditional' %}text-amber-600{% else %}text-rose-600{% endif %}">
-                {{ "%.1f"|format(a.quality_score) }} / 100
+                {{ "%.1f"|format(a.confidence) }}%
               </td>
               <td class="py-3.5 px-5">
                 {% if a.status == 'valid' %}
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#eafaf2] text-[#11894a] border border-[#b9e8cf]">
-                  🟢 Yaroqli
+                  Good
                 </span>
                 {% elif a.status == 'conditional' %}
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                  🟡 Shartli
+                  Moderate
                 </span>
                 {% else %}
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                  🔴 Yaroqsiz
+                  Poor
                 </span>
                 {% endif %}
               </td>
@@ -928,7 +928,6 @@
         <div style="display:flex; align-items:center; gap:6px;">
           <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${getStatusColor(source.status)};"></span>
           <span>${source.name}</span>
-          <span style="opacity:0.8; font-weight:normal; font-size:10px;">(${source.quality_score}/100)</span>
         </div>
       `, {
         direction: 'top',
@@ -957,7 +956,6 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; background: #f8fafc; padding: 6px 8px; border-radius: 8px; margin-bottom: 8px;">
             <div><b>pH:</b> ${source.ph}</div>
             <div><b>TDS:</b> ${source.tds} mg/L</div>
-            <div><b>WQI:</b> ${source.quality_score}/100</div>
             <div><b>Loyqalik:</b> ${source.turbidity} NTU</div>
           </div>
           <p style="font-size: 11px; color: #475569; margin: 0 0 8px 0; line-height: 1.35;">
